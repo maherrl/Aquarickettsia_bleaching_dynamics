@@ -1,12 +1,4 @@
-#######################################################
-## Dada2 script for paired-end sequence processing,
-## ASV assignment, and taxonomic assignment
-## From Grace Klinges
-## Added October 29, 2018
-######################################################
-
-# Libraries
-alibrary(dada2); packageVersion("dada2")
+library(dada2); packageVersion("dada2")
 
 path <- "~/Bleaching_Rickettsiales/"
 # Forward and reverse fastq filenames have format: SAMPLENAME_R1.fq and SAMPLENAME_R2.fq
@@ -22,12 +14,15 @@ filtFs <- file.path(path, "filtered", paste0(sample.names, "_F_filt.fastq.gz"))
 filtRs <- file.path(path, "filtered", paste0(sample.names, "_R_filt.fastq.gz"))
 out <- filterAndTrim(fnFs, filtFs, fnRs, filtRs, truncLen=c(260,210),
                      maxN=0, maxEE=c(2,2), truncQ=2, rm.phix=TRUE,
-                     compress=TRUE, multithread=TRUE) # On Windows set multithread=FALSE
+                     compress=TRUE, multithread=TRUE)
+#In English: discarded reads with more than 2 expected errors
+#trimmed forward reads at 260, reverse at 210. Max N of 0, truncQ of 2 means 
+#truncate reads at the first instance of a quality score less than or equal to 2
 head(out)
 
 # File parsing
-filtpathF <- "~/Bleaching_Rickettsiales/fastq/filteredF" # CHANGE ME to the directory containing your filtered forward fastqs
-filtpathR <- "~/Bleaching_Rickettsiales/fastq/filteredR" # CHANGE ME ...
+filtpathF <- "~/Bleaching_Rickettsiales/fastq/filteredF" 
+filtpathR <- "~/Bleaching_Rickettsiales/fastq/filteredR" 
 filtFs <- list.files(filtpathF, pattern="fastq.gz", full.names = TRUE)
 filtRs <- list.files(filtpathR, pattern="fastq.gz", full.names = TRUE)
 sample.names <- sapply(strsplit(basename(filtFs), "_"), `[`, 1) # Assumes filename = samplename_XXX.fastq.gz
