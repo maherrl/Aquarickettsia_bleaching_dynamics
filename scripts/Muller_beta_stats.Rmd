@@ -1,0 +1,313 @@
+---
+title: "Muller_beta_stats"
+author: "Becca Maher"
+date: "November 08, 2019"
+output: html_document
+---
+
+## 1 Set up
+```{r, include=FALSE}
+## clear workspace------------------------
+rm(list=ls())
+
+# load libraries
+library('phyloseq'); packageVersion('phyloseq')
+library('vegan'); packageVersion('vegan')
+library("usedist")
+
+# set working directory-------------------
+#setwd("~/Box Sync/RAPID-analysis/")
+
+## functions----------------------
+pairwise.adonis.dm <- function(x,factors,stratum=NULL,p.adjust.m="bonferroni",perm=999){
+  
+  library(vegan)
+  
+  if(class(x) != "dist") stop("x must be a dissimilarity matrix (dist object)")
+  
+  co = as.matrix(combn(unique(factors),2))
+  
+  pairs = c()
+  
+  F.Model =c()
+  
+  R2 = c()
+  
+  p.value = c()
+  
+  
+  
+  for(elem in 1:ncol(co)){
+    
+    sub_inds <- factors %in% c(as.character(co[1,elem]),as.character(co[2,elem]))
+    
+    resp <- as.matrix(x)[sub_inds,sub_inds]
+    
+    ad = adonis(as.dist(resp) ~
+                  
+                  factors[sub_inds], strata=stratum[sub_inds], permutations=perm);
+    
+    pairs = c(pairs,paste(co[1,elem],'vs',co[2,elem]));
+    
+    F.Model =c(F.Model,ad$aov.tab[1,4]);
+    
+    R2 = c(R2,ad$aov.tab[1,5]);
+    
+    p.value = c(p.value,ad$aov.tab[1,6])
+    
+  }
+  
+  p.adjusted = p.adjust(p.value,method=p.adjust.m)
+  
+  pairw.res = data.frame(pairs,F.Model,R2,p.value,p.adjusted)
+  
+  return(pairw.res)
+  }
+```
+
+```{r}
+## Data Analysis----------------------------
+
+# First import data from bioinformatic processing
+load(file = "./data/muller_bleaching_silva_species_assign.RData")
+map = import_qiime_sample_data("./data/map.txt")
+sample_names(map)
+sample_data(ps) <- map
+ps
+```
+
+## 2 Analysis of log transformed data
+
+Optional transformations to the data
+```{r}
+# Log-transform OTU table
+otus_log <- as(otu_table(ps), "matrix")
+otus_log <- decostand(otus_log, method = "log")
+OTU_log <- otu_table(otus_log, taxa_are_rows = TRUE)
+otu_table(ps) <- OTU_log
+```
+
+### Calculate distance matrices
+
+```{r}
+# Calculate all four distance matrices: weighted unifrac, unweighted unifrac, bray curtis, binary jaccard
+ps_wu <- phyloseq::distance(ps, method = "wunifrac")
+ps_un <- phyloseq::distance(ps, method = "unifrac")
+ps_bc <- phyloseq::distance(ps, method = "bray")
+ps_bj <- distance(ps, method = "jaccard", binary =TRUE)
+```
+### PERMANOVAs
+```{r}
+# PERMANOVA's with Adonis -  Permutational Multivariate Analasis of Variance
+# Make a data frame from the sample_data
+sampledf <- data.frame(sample_data(ps))
+psdf <- as.data.frame(otu_table(ps))
+```
+#### geno
+```{r}
+# Adonis individual tests
+adonis(ps_bc ~ geno, data = sampledf)
+adonis(ps_bj ~ geno, data = sampledf)
+adonis(ps_wu ~ geno, data = sampledf)
+adonis(ps_un ~ geno, data = sampledf)
+# all significant
+pairwise.adonis.dm(ps_bc, sample_data(ps)$geno, p.adjust.m = "fdr")
+pairwise.adonis.dm(ps_bj, sample_data(ps)$geno, p.adjust.m = "fdr")
+pairwise.adonis.dm(ps_wu, sample_data(ps)$geno, p.adjust.m = "fdr")
+pairwise.adonis.dm(ps_un, sample_data(ps)$geno, p.adjust.m = "fdr")
+```
+#### bleach
+```{r}
+adonis(ps_bc ~ bleach, data = sampledf)
+adonis(ps_bj ~ bleach, data = sampledf)
+adonis(ps_wu ~ bleach, data = sampledf)
+adonis(ps_un ~ bleach, data = sampledf)
+# all non-significant
+```
+#### Species
+```{r}
+# Adonis won't run on samples that have an NA for species
+# So I subset the dist to get rid of the samples without a species ID
+samples_wna <- c("July2016.228.2", "July2016.251.2", "July2016.251.1")
+samples <- sample_names(ps)
+samples_nona <- setdiff(samples, samples_wna)
+ps_bc_sub <- dist_subset(ps_bc, samples_nona)
+ps_bj_sub <- dist_subset(ps_bj, samples_nona)
+ps_wu_sub <- dist_subset(ps_wu, samples_nona)
+ps_un_sub <- dist_subset(ps_un, samples_nona)
+
+adonis(ps_bc_sub ~ species, data = sampledf)
+adonis(ps_bj_sub ~ species, data = sampledf)
+adonis(ps_wu_sub ~ species, data = sampledf)
+adonis(ps_un_sub ~ species, data = sampledf)
+
+sampledf_na <- subset(sampledf, sample.id != "July2016.228.2" & sample.id != "July2016.251.2" & sample.id != "July2016.251.1")
+
+# All significant
+pairwise.adonis.dm(ps_bc_sub, sampledf_na$species, p.adjust.m = "fdr")
+pairwise.adonis.dm(ps_bj_sub, sampledf_na$species, p.adjust.m = "fdr")
+pairwise.adonis.dm(ps_wu_sub, sampledf_na$species, p.adjust.m = "fdr")
+pairwise.adonis.dm(ps_un_sub, sampledf_na$species, p.adjust.m = "fdr")
+```
+#### Nutrient
+bleach was control or nutrient (urea or nitrate)
+```{r}
+adonis(ps_bc ~ nutrient, data = sampledf)
+adonis(ps_bj ~ nutrient, data = sampledf)
+adonis(ps_wu ~ nutrient, data = sampledf)
+adonis(ps_un ~ nutrient, data = sampledf)
+# No significant results
+```
+#### Interaction
+```{r}
+# Adonis test for between group diversity, with full formula
+adonis(ps_bc_sub ~ geno*species*bleach, data = sampledf) # sig: geno, species, geno:species
+adonis(ps_bj_sub ~ geno*species*bleach, data = sampledf) # sig: geno, species, geno:species
+adonis(ps_wu_sub ~ geno*species*bleach, data = sampledf) # sig: geno, species
+adonis(ps_un_sub ~ geno*species*bleach, data = sampledf) # sig: geno, species, geno:species
+```
+
+### PERMDISPs
+#### Species
+```{r}
+# PERMDISP with betadisper - Multivariate Homogeneity of group dispersions
+anova(betadisper(ps_bc, sampledf$species, bias.adjust = TRUE)) # non sig
+anova(betadisper(ps_bj, sampledf$species, bias.adjust = TRUE)) # non sig
+anova(betadisper(ps_wu, sampledf$species, bias.adjust = TRUE)) # significant
+anova(betadisper(ps_un, sampledf$species, bias.adjust = TRUE)) # non sig
+# pairwise test
+p.adjust(permutest(betadisper(ps_wu, sampledf$species, 
+                              bias.adjust = TRUE), 
+                   pairwise=TRUE)$pairwise$permuted, method = 'fdr')
+```
+#### bleach
+```{r}
+anova(betadisper(ps_bc, sampledf$bleach, bias.adjust = TRUE))
+anova(betadisper(ps_bj, sampledf$bleach, bias.adjust = TRUE))
+anova(betadisper(ps_wu, sampledf$bleach, bias.adjust = TRUE))
+anova(betadisper(ps_un, sampledf$bleach, bias.adjust = TRUE))
+# All non-significant
+```
+#### geno
+```{r}
+anova(betadisper(ps_bc, sampledf$geno, bias.adjust = TRUE)) # non sig
+anova(betadisper(ps_bj, sampledf$geno, bias.adjust = TRUE)) # significant
+anova(betadisper(ps_wu, sampledf$geno, bias.adjust = TRUE)) # significant
+anova(betadisper(ps_un, sampledf$geno, bias.adjust = TRUE)) # significant
+# pairwise tests
+p.adjust(permutest(betadisper(ps_bj, sampledf$geno, 
+                              bias.adjust = TRUE), 
+                   pairwise=TRUE)$pairwise$permuted, method = 'fdr')
+p.adjust(permutest(betadisper(ps_wu, sampledf$geno, 
+                              bias.adjust = TRUE), 
+                   pairwise=TRUE)$pairwise$permuted, method = 'fdr')
+p.adjust(permutest(betadisper(ps_un, sampledf$geno, 
+                              bias.adjust = TRUE), 
+                   pairwise=TRUE)$pairwise$permuted, method = 'fdr')
+
+```
+#### Interaction
+```{r}
+anova(betadisper(ps_bc, sampledf$geno.trt, bias.adjust = TRUE))
+anova(betadisper(ps_bj, sampledf$geno.trt, bias.adjust = TRUE))
+anova(betadisper(ps_un, sampledf$geno.trt, bias.adjust = TRUE)) # significant
+anova(betadisper(ps_wu, sampledf$geno.trt, bias.adjust = TRUE)) # significant
+# pairwise tests
+p.adjust(permutest(betadisper(ps_un, sampledf$geno.trt, 
+                              bias.adjust = TRUE), 
+                   pairwise=TRUE)$pairwise$permuted, method = 'fdr')
+p.adjust(permutest(betadisper(ps_wu, sampledf$geno.trt, 
+                              bias.adjust = TRUE), 
+                   pairwise=TRUE)$pairwise$permuted, method = 'fdr')
+
+```
+
+## 3 Analysis of log transformed Acropora data
+```{r}
+# subset by species
+ps <- subset_samples(ps, species =="ACR")
+#ps <- subset_samples(ps, species =="POC")
+#ps <- subset_samples(ps, geno == "T2")
+```
+
+Calculate distance matrices
+```{r}
+# Calculate all four distance matrices: weighted unifrac, unweighted unifrac, bray curtis, binary jaccard
+ps_wu <- phyloseq::distance(ps, method = "wunifrac")
+ps_un <- phyloseq::distance(ps, method = "unifrac")
+ps_bc <- phyloseq::distance(ps, method = "bray")
+ps_bj <- distance(ps, method = "jaccard", binary =TRUE)
+```
+
+### PERMANOVAs
+```{r cars}
+# PERMANOVA's with Adonis -  Permutational Multivariate Analasis of Variance
+# Make a data frame from the sample_data
+sampledf <- data.frame(sample_data(ps))
+```
+#### geno
+```{r}
+# Adonis individual tests
+adonis(ps_bc ~ geno, data = sampledf)
+adonis(ps_bj ~ geno, data = sampledf)
+adonis(ps_wu ~ geno, data = sampledf)
+adonis(ps_un ~ geno, data = sampledf)
+# all significant
+# pairwise tests
+pairwise.adonis.dm(ps_bc, sample_data(ps)$geno, p.adjust.m = "fdr")
+pairwise.adonis.dm(ps_bj, sample_data(ps)$geno, p.adjust.m = "fdr")
+pairwise.adonis.dm(ps_wu, sample_data(ps)$geno, p.adjust.m = "fdr")
+pairwise.adonis.dm(ps_un, sample_data(ps)$geno, p.adjust.m = "fdr")
+```
+#### bleach
+```{r}
+adonis(ps_bc ~ bleach, data = sampledf)
+adonis(ps_bj ~ bleach, data = sampledf)
+adonis(ps_wu ~ bleach, data = sampledf)
+adonis(ps_un ~ bleach, data = sampledf)
+# all non significant
+```
+#### Interaction
+```{r}
+adonis(ps_bc ~ geno*bleach, data = sampledf) # geno
+adonis(ps_bj ~ geno*bleach, data = sampledf) # geno
+adonis(ps_wu ~ geno*bleach, data = sampledf) # geno
+adonis(ps_un ~ geno*bleach, data = sampledf) # geno
+```
+### PERMDISPs
+#### bleach
+```{r}
+# PERMDISP with betadisper - Multivariate Homogeneity of group dispersions
+anova(betadisper(ps_bc, sampledf$bleach, bias.adjust = TRUE)) # significant
+anova(betadisper(ps_bj, sampledf$bleach, bias.adjust = TRUE))
+anova(betadisper(ps_wu, sampledf$bleach, bias.adjust = TRUE))
+anova(betadisper(ps_un, sampledf$bleach, bias.adjust = TRUE))
+# pairwise
+p.adjust(permutest(betadisper(ps_bc, sampledf$bleach, 
+                              bias.adjust = TRUE), 
+                   pairwise=TRUE)$pairwise$permuted, method = 'fdr')
+```
+#### geno
+```{r}
+anova(betadisper(ps_bc, sampledf$geno, bias.adjust = TRUE))
+anova(betadisper(ps_bj, sampledf$geno, bias.adjust = TRUE)) # sig
+anova(betadisper(ps_wu, sampledf$geno, bias.adjust = TRUE)) # sig
+anova(betadisper(ps_un, sampledf$geno, bias.adjust = TRUE))
+# pairwise
+p.adjust(permutest(betadisper(ps_bj, sampledf$geno, 
+                              bias.adjust = TRUE), 
+                   pairwise=TRUE)$pairwise$permuted, method = 'fdr')
+p.adjust(permutest(betadisper(ps_wu, sampledf$geno, 
+                              bias.adjust = TRUE), 
+                   pairwise=TRUE)$pairwise$permuted, method = 'fdr')
+```
+Plotting
+```{r}
+nmds_bc <- metaMDSiter(ps_bc, k=2, trymax = 1000, maxit = 1000, autotransform=FALSE)
+nmds_bc <- metaMDSiter(ps_bc, k=2, trymax = 1000, maxit = 1000, autotransform=FALSE)
+
+a <- plot_ordination(ps, nmds_bc, color = "bleach") + geom_point(size = 2) + theme_classic() +
+  theme(legend.position = "left") + scale_colour_colorblind()
+a
+
+```{r}
