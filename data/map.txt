@@ -1,63 +1,63 @@
-sample.ID	bleach	geno	rep
-Acropora.cervicornis.Aug10A	Aug	10	A
-Acropora.cervicornis.Aug10B	Aug	10	B
-Acropora.cervicornis.Aug13A	Aug	13	A
-Acropora.cervicornis.Aug13B	Aug	13	B
-Acropora.cervicornis.Aug1A	Aug	1	A
-Acropora.cervicornis.Aug1B	Aug	1	B
-Acropora.cervicornis.Aug20A	Aug	20	A
-Acropora.cervicornis.Aug20B	Aug	20	B
-Acropora.cervicornis.Aug3A	Aug	3	A
-Acropora.cervicornis.Aug3B	Aug	3	B
-Acropora.cervicornis.Aug41A	Aug	41	A
-Acropora.cervicornis.Aug41B	Aug	41	B
-Acropora.cervicornis.Aug44A	Aug	44	A
-Acropora.cervicornis.Aug44B	Aug	44	B
-Acropora.cervicornis.Aug46A	Aug	46	A
-Acropora.cervicornis.Aug46B	Aug	46	B
-Acropora.cervicornis.Aug47A	Aug	47	A
-Acropora.cervicornis.Aug47B	Aug	47	B
-Acropora.cervicornis.Aug4A	Aug	4	A
-Acropora.cervicornis.Aug4B	Aug	4	B
-Acropora.cervicornis.Aug50A	Aug	50	A
-Acropora.cervicornis.Aug50B	Aug	50	B
-Acropora.cervicornis.Aug57A	Aug	57	A
-Acropora.cervicornis.Aug57B	Aug	57	B
-Acropora.cervicornis.Aug58A	Aug	58	A
-Acropora.cervicornis.Aug58B	Aug	58	B
-Acropora.cervicornis.Aug5A	Aug	5	A
-Acropora.cervicornis.Aug5B	Aug	5	B
-Acropora.cervicornis.Aug7A	Aug	7	A
-Acropora.cervicornis.Aug7B	Aug	7	B
-Acropora.cervicornis.Aug9A	Aug	9	A
-Acropora.cervicornis.Aug9B	Aug	9	B
-Acropora.cervicornis.Sep10A	Sep	10	A
-Acropora.cervicornis.Sep10B	Sep	10	B
-Acropora.cervicornis.Sep13A	Sep	13	A
-Acropora.cervicornis.Sep13B	Sep	13	B
-Acropora.cervicornis.Sep1A	Sep	1	A
-Acropora.cervicornis.Sep1B	Sep	1	B
-Acropora.cervicornis.Sep3A	Sep	3	A
-Acropora.cervicornis.Sep3B	Sep	3	B
-Acropora.cervicornis.Sep41A	Sep	41	A
-Acropora.cervicornis.Sep41B	Sep	41	B
-Acropora.cervicornis.Sep44A	Sep	44	A
-Acropora.cervicornis.Sep44B	Sep	44	B
-Acropora.cervicornis.Sep46A	Sep	46	A
-Acropora.cervicornis.Sep46B	Sep	46	B
-Acropora.cervicornis.Sep47A	Sep	47	A
-Acropora.cervicornis.Sep47B	Sep	47	B
-Acropora.cervicornis.Sep4A	Sep	4	A
-Acropora.cervicornis.Sep4B	Sep	4	B
-Acropora.cervicornis.Sep50A	Sep	50	A
-Acropora.cervicornis.Sep50B	Sep	50	B
-Acropora.cervicornis.Sep57A	Sep	57	A
-Acropora.cervicornis.Sep57B	Sep	57	B
-Acropora.cervicornis.Sep58A	Sep	58	A
-Acropora.cervicornis.Sep58B	Sep	58	B
-Acropora.cervicornis.Sep5A	Sep	5	A
-Acropora.cervicornis.Sep5B	Sep	5	B
-Acropora.cervicornis.Sep7A	Sep	7	A
-Acropora.cervicornis.Sep7B	Sep	7	B
-Acropora.cervicornis.Sep9A	Sep	9	A
-Acropora.cervicornis.Sep9B	Sep	9	B
+sampleid	bleach	geno	rep	bleach-geno	geno-bleach
+Acropora.cervicornis.Aug10A	Aug	G10	A	AugG10	G10Aug
+Acropora.cervicornis.Aug10B	Aug	G10	B	AugG10	G10Aug
+Acropora.cervicornis.Aug13A	Aug	G13	A	AugG13	G13Aug
+Acropora.cervicornis.Aug13B	Aug	G13	B	AugG13	G13Aug
+Acropora.cervicornis.Aug1A	Aug	G1	A	AugG1	G1Aug
+Acropora.cervicornis.Aug1B	Aug	G1	B	AugG1	G1Aug
+Acropora.cervicornis.Aug20A	Aug	G20	A	AugG20	G20Aug
+Acropora.cervicornis.Aug20B	Aug	G20	B	AugG20	G20Aug
+Acropora.cervicornis.Aug3A	Aug	G3	A	AugG3	G3Aug
+Acropora.cervicornis.Aug3B	Aug	G3	B	AugG3	G3Aug
+Acropora.cervicornis.Aug41A	Aug	G41	A	AugG41	G41Aug
+Acropora.cervicornis.Aug41B	Aug	G41	B	AugG41	G41Aug
+Acropora.cervicornis.Aug44A	Aug	G44	A	AugG44	G44Aug
+Acropora.cervicornis.Aug44B	Aug	G44	B	AugG44	G44Aug
+Acropora.cervicornis.Aug46A	Aug	G46	A	AugG46	G46Aug
+Acropora.cervicornis.Aug46B	Aug	G46	B	AugG46	G46Aug
+Acropora.cervicornis.Aug47A	Aug	G47	A	AugG47	G47Aug
+Acropora.cervicornis.Aug47B	Aug	G47	B	AugG47	G47Aug
+Acropora.cervicornis.Aug4A	Aug	G4	A	AugG4	G4Aug
+Acropora.cervicornis.Aug4B	Aug	G4	B	AugG4	G4Aug
+Acropora.cervicornis.Aug50A	Aug	G50	A	AugG50	G50Aug
+Acropora.cervicornis.Aug50B	Aug	G50	B	AugG50	G50Aug
+Acropora.cervicornis.Aug57A	Aug	G57	A	AugG57	G57Aug
+Acropora.cervicornis.Aug57B	Aug	G57	B	AugG57	G57Aug
+Acropora.cervicornis.Aug58A	Aug	G58	A	AugG58	G58Aug
+Acropora.cervicornis.Aug58B	Aug	G58	B	AugG58	G58Aug
+Acropora.cervicornis.Aug5A	Aug	G5	A	AugG5	G5Aug
+Acropora.cervicornis.Aug5B	Aug	G5	B	AugG5	G5Aug
+Acropora.cervicornis.Aug7A	Aug	G7	A	AugG7	G7Aug
+Acropora.cervicornis.Aug7B	Aug	G7	B	AugG7	G7Aug
+Acropora.cervicornis.Aug9A	Aug	G9	A	AugG9	G9Aug
+Acropora.cervicornis.Aug9B	Aug	G9	B	AugG9	G9Aug
+Acropora.cervicornis.Sep10A	Sep	G10	A	SepG10	G10Sep
+Acropora.cervicornis.Sep10B	Sep	G10	B	SepG10	G10Sep
+Acropora.cervicornis.Sep13A	Sep	G13	A	SepG13	G13Sep
+Acropora.cervicornis.Sep13B	Sep	G13	B	SepG13	G13Sep
+Acropora.cervicornis.Sep1A	Sep	G1	A	SepG1	G1Sep
+Acropora.cervicornis.Sep1B	Sep	G1	B	SepG1	G1Sep
+Acropora.cervicornis.Sep3A	Sep	G3	A	SepG3	G3Sep
+Acropora.cervicornis.Sep3B	Sep	G3	B	SepG3	G3Sep
+Acropora.cervicornis.Sep41A	Sep	G41	A	SepG41	G41Sep
+Acropora.cervicornis.Sep41B	Sep	G41	B	SepG41	G41Sep
+Acropora.cervicornis.Sep44A	Sep	G44	A	SepG44	G44Sep
+Acropora.cervicornis.Sep44B	Sep	G44	B	SepG44	G44Sep
+Acropora.cervicornis.Sep46A	Sep	G46	A	SepG46	G46Sep
+Acropora.cervicornis.Sep46B	Sep	G46	B	SepG46	G46Sep
+Acropora.cervicornis.Sep47A	Sep	G47	A	SepG47	G47Sep
+Acropora.cervicornis.Sep47B	Sep	G47	B	SepG47	G47Sep
+Acropora.cervicornis.Sep4A	Sep	G4	A	SepG4	G4Sep
+Acropora.cervicornis.Sep4B	Sep	G4	B	SepG4	G4Sep
+Acropora.cervicornis.Sep50A	Sep	G50	A	SepG50	G50Sep
+Acropora.cervicornis.Sep50B	Sep	G50	B	SepG50	G50Sep
+Acropora.cervicornis.Sep57A	Sep	G57	A	SepG57	G57Sep
+Acropora.cervicornis.Sep57B	Sep	G57	B	SepG57	G57Sep
+Acropora.cervicornis.Sep58A	Sep	G58	A	SepG58	G58Sep
+Acropora.cervicornis.Sep58B	Sep	G58	B	SepG58	G58Sep
+Acropora.cervicornis.Sep5A	Sep	G5	A	SepG5	G5Sep
+Acropora.cervicornis.Sep5B	Sep	G5	B	SepG5	G5Sep
+Acropora.cervicornis.Sep7A	Sep	G7	A	SepG7	G7Sep
+Acropora.cervicornis.Sep7B	Sep	G7	B	SepG7	G7Sep
+Acropora.cervicornis.Sep9A	Sep	G9	A	SepG9	G9Sep
+Acropora.cervicornis.Sep9B	Sep	G9	B	SepG9	G9Sep
