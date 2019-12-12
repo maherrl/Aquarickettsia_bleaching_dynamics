@@ -1,0 +1,164 @@
+---
+title: "Muller Corals Calculate Alpha Diversity Statistics"
+author: "Becca Maher"
+date: "12/10/2019"
+output: html_document
+---
+## Script for calculating alpha diversity statistics and testing for significant differences with metadata variables
+
+### 1 Setup the working space
+#### Libraries
+```{r libraries, message=FALSE}
+rm(list=ls())
+knitr::opts_knit$set(root.dir = "/Users/Becca/Box Sync/Muller Bleaching and Rickettsiales/Muller-Acropora/")
+library(phyloseq)
+library(multcomp)
+library(picante)
+library(ggplot2 )
+library(tidyverse)
+```
+
+#### Functions
+```{r functions, include = FALSE}
+# Arc-sine transformation
+asinTransform <- function(p) { asin(sqrt(p)) }
+# Estimate faith's phylogenetic diversity 
+estimate_pd <- function(phylo){
+  
+  # Error if input is not of class phylo
+  if(class(phylo) != "phyloseq"){
+    stop("Input file is not of class 'phyloseq'.")
+  }
+  
+  # Error if no class phy_tree
+  if(!(.hasSlot(phylo, "phy_tree"))){
+    stop("Could not find tree slot in phylo object.")
+  }
+  
+  # Transpose if needed
+  # Adapted from phyloseq/vegan import
+  OTU <- phyloseq::otu_table(phylo)
+  if (taxa_are_rows(OTU)) {
+    OTU <- t(OTU)
+  }
+  
+  # Get matrix version of OTU table
+  otutable <- as(OTU, "matrix")
+  
+  # Get phylogenetic tree from pyloseq object
+  tree <- phyloseq::phy_tree(phylo)
+  
+  # Print status message
+  message("Calculating Faiths PD-index...")
+  
+  # If object is greater than 10mb, then print status message
+  if(object.size(otutable) > 10000000){
+    message("This is a large object, it may take awhile...")
+  }
+  
+  # Calculate Faith's PD-index
+  pdtable <- picante::pd(otutable, tree, include.root = F)
+  
+  # Return data frame of results
+  return(pdtable)
+}
+# Calculate standard error
+sderr <- function(x) {sd(x)/sqrt(length(x))}
+#+++++++++++++++++++++++++
+# Function to calculate the mean and the standard deviation
+# for each group
+#+++++++++++++++++++++++++
+# data : a data frame
+# varname : the name of a column containing the variable
+#to be summariezed
+# groupnames : vector of column names to be used as
+# grouping variables
+data_summary <- function(data, varname, groupnames){
+  require(plyr)
+  summary_func <- function(x, col){
+    c(mean = mean(x[[col]], na.rm=TRUE),
+      sd = sderr(x[[col]]), na.rm=TRUE)
+  }
+  data_sum<-ddply(data, groupnames, .fun=summary_func,
+                  varname)
+  data_sum <- rename(data_sum, c("mean" = varname))
+  return(data_sum)
+}
+```
+
+#### Load the data
+For all alpha and beta diversity statistics, I will be using the rarefied sOTU table. The table has been rarefied to 1778 sequences per sample.
+```{r load}
+setwd("/Users/Becca/Box Sync/Muller Bleaching and Rickettsiales/Muller-Acropora/")
+getwd()
+load("./data/ps_rar8692.RData")
+ps
+```
+
+### Calculating alpha diversity statistics
+Initialize matrices to store obsness and simpson estimates
+```{r init}
+nsamp = nsamples(ps)
+
+observed <- matrix(nrow = nsamp)
+row.names(observed) <- sample_names(ps)
+
+chao1 <- matrix(nrow =nsamp)
+row.names(chao1) <- sample_names(ps)
+
+simpson <- matrix(nrow =nsamp)
+row.names(simpson) <- sample_names(ps)
+
+shannon <- matrix(nrow =nsamp)
+row.names(shannon) <- sample_names(ps)
+
+faithPD <- matrix(nrow = nsamp)
+row.names(faithPD) <- sample_names(ps)
+##
+```
+Calculate statistics
+```{r stats, message = FALSE}
+# Options for measures = ("Observed", "Chao1", "ACE", "Shannon", "Simpson", "InvSimpson", "Fisher")
+
+# Calculate observed
+obs <- as.numeric(as.matrix(estimate_richness(ps, measures = "Observed")))
+observed[ ,] <- obs
+colnames(observed) [1] <- "observed"
+
+# Calculate chao1
+hao <- as.numeric(as.matrix(subset(estimate_richness(ps, measures = "Chao1"), select = c(1))))
+chao1[ ,] <- chao
+colnames(chao1) [1] <- "chao1"
+
+# Calculate simpson
+simp <- as.numeric(as.matrix(estimate_richness(ps, measures = "Simpson")))
+simpson[ ,] <- simp
+colnames(simpson) [1] <- "simpson"
+
+# Calculate shannon
+shan <- as.numeric(as.matrix(estimate_richness(ps, measures = "Shannon")))
+shannon[ ,] <- shan
+colnames(shannon) [1] <- "shannon"
+
+# Calculate Faith's PD
+faith <- as.numeric(as.matrix(subset(estimate_pd(ps), select = c(1))))  # estimate_pd is a function assigned at the end of the script
+faithPD[ ,] <- faith
+colnames(faithPD) [1] <- "faithPD"
+
+# Included the subset in "obs" and "faith" because the Chao1 and Faith's PD measurement outputs two measures per sample (Chao1 and se.chao1)
+# and we only want Chao1, so we select for the first column
+```
+Combine our estimates for observed, simpson, and faith's PD into one dataframe
+```{r compile}
+alpha <- cbind(observed, chao1,simpson,shannon, faithPD)
+
+head(alpha)
+
+# Add the sample metadata into this dataframe
+s <- data.frame(sample_data(ps))
+alphadiv <- cbind(alpha, s)
+head(alphadiv)
+alphadiv <- alphadiv[,-6]
+head(alphadiv)
+#write.csv(alphadiv, file = "../data/alphadiv8692.csv")
+```

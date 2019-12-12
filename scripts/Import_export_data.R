@@ -12,6 +12,8 @@ library("ggthemes")
 library("ampvis2")
 library("cowplot")
 
+setwd("/Users/Becca/Box Sync/Muller Bleaching and Rickettsiales/Muller-Acropora/")
+
 # functions
 fast_melt = function(physeq){
   # supports "naked" otu_table as `physeq` input.
@@ -58,7 +60,7 @@ uniqueSeqs <- as.list(colnames(seqtab))
 #write.fasta(uniqueSeqs, uniqueSeqs, "./data/uniqueSeqs.fasta")
 
 # phylogenetic tree made from qiime phylogeny align-to-tree-mafft-fasttree
-tree = read_tree("./qiime/tree.nwk")
+tree = read_tree("./data/tree.nwk")
 # import metadata and merge into phyloseq object
 mapfile = "./data/map.txt"
 map = import_qiime_sample_data(mapfile)
@@ -99,11 +101,12 @@ pst = fast_melt(ps)
 prevdt = pst[, list(Prevalence = sum(count > 0), 
                     TotalCounts = sum(count)),
              by = taxaID]
-keepTaxa = prevdt[(Prevalence >=2 & TotalCounts >10), taxaID]
+keepTaxa = prevdt[(Prevalence >=0 & TotalCounts >28), taxaID]
 ps = prune_taxa(keepTaxa,ps)
 ps
 sample_sums(ps)
 min(sample_sums(ps))
+# 28 is the bottom quartile frequency per feature (asv)
 
 # exploratory code
 observed <- estimate_richness(ps, measures = c('Observed'))
@@ -177,4 +180,4 @@ ggplot(data = richness.rare, aes(x = Shannon, y = (Simpson-1)*-1, color = Bleach
   theme_cowplot()
 
 # save ps object
-save(ps, file = "./data/ps_rar7461.RData")
+save(ps, file = "./data/ps_rar8692.RData")
