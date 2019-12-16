@@ -11,6 +11,8 @@ library("ggplot2")
 library("ggthemes")
 library("ampvis2")
 library("cowplot")
+library("phyloseq")
+library("data.table")
 
 setwd("/Users/Becca/Box Sync/Muller Bleaching and Rickettsiales/Muller-Acropora/")
 
@@ -106,6 +108,9 @@ ps = prune_taxa(keepTaxa,ps)
 ps
 sample_sums(ps)
 min(sample_sums(ps))
+#save(ps, file = "./data/ps.RData")
+
+sample_data(ps)$geno.num=factor(get_variable(ps, "geno.num"))
 # 28 is the bottom quartile frequency per feature (asv)
 
 # exploratory code
@@ -155,9 +160,10 @@ length(explore.df$Sample_Sums)
 # plot alpha diversity
 plot_richness(ps, measures = c('Shannon', 'Simpson'))
 # rarefy
-set.seed(400)
-ps_rar <- rarefy_even_depth(ps) # sub sample to minimum depth 7,461
-ps_rar
+#set.seed(400)
+ps <- rarefy_even_depth(ps, sample.size = 8692, rngseed = 999) 
+ps
+sample_sums(ps)
 # plot alpha diversity
 richness.rare <- cbind(estimate_richness(ps_rar, 
                                          measures = c('Shannon', 'Simpson')),

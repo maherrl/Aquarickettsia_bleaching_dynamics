@@ -214,6 +214,15 @@ data_summary &lt;- function(data, varname, groupnames){
                   varname)
   data_sum &lt;- rename(data_sum, c(&quot;mean&quot; = varname))
   return(data_sum)
+}
+
+normality.plots &lt;- function(x) {
+  par(mfrow=c(2,2))
+  hist(residuals(x), main = &quot;Histogram&quot;, xlab = &quot;Values&quot;)
+  boxplot(residuals(x), main = &quot;Boxplot&quot;, ylab = &quot;Values&quot;)
+  qqnorm(residuals(x))
+  qqline(residuals(x))
+  plot(density(residuals(x)), main = &quot;Kernel Density Estimate&quot;)
 }</code></pre>
 </div>
 <div id="load-the-data" class="section level4">
@@ -228,13 +237,13 @@ head(alphadiv)</code></pre>
 ## 4 Acropora.cervicornis.Aug13B       93    93 0.9145083 2.868448 6.036948    Aug
 ## 5  Acropora.cervicornis.Aug1A       43    43 0.9015761 2.524715 3.782072    Aug
 ## 6  Acropora.cervicornis.Aug1B       49    49 0.8954460 2.530993 3.852267    Aug
-##   geno rep bleach.geno geno.bleach
-## 1  G10   A      AugG10      G10Aug
-## 2  G10   B      AugG10      G10Aug
-## 3  G13   A      AugG13      G13Aug
-## 4  G13   B      AugG13      G13Aug
-## 5   G1   A       AugG1       G1Aug
-## 6   G1   B       AugG1       G1Aug</code></pre>
+##   geno geno.num rep bleach.geno geno.bleach        type
+## 1  G10       10   A      AugG10      G10Aug susceptible
+## 2  G10       10   B      AugG10      G10Aug susceptible
+## 3  G13       13   A      AugG13      G13Aug susceptible
+## 4  G13       13   B      AugG13      G13Aug susceptible
+## 5   G1        1   A       AugG1       G1Aug susceptible
+## 6   G1        1   B       AugG1       G1Aug susceptible</code></pre>
 </div>
 </div>
 <div id="data-summary-statistics" class="section level3">
@@ -315,58 +324,58 @@ data_summary(alphadiv, varname = &quot;observed&quot;, groupnames = c(&quot;blea
 data_summary(alphadiv, varname = &quot;simpson&quot;, groupnames = c(&quot;bleach&quot;))</code></pre>
 <pre><code>##   bleach   simpson          sd na.rm
 ## 1    Aug 0.9216928 0.004982001     1
-## 2    Sep 0.9851377 0.001100389     1</code></pre>
+## 2    Sep 0.9851377 0.001100388     1</code></pre>
 <pre class="r"><code>data_summary(alphadiv, varname = &quot;simpson&quot;, groupnames = c(&quot;geno&quot;))</code></pre>
 <pre><code>##    geno   simpson          sd na.rm
 ## 1    G1 0.9404732 0.024559331     1
 ## 2   G10 0.9433856 0.025356780     1
 ## 3   G13 0.9590222 0.015636904     1
 ## 4   G20 0.9028816 0.001106464     1
-## 5    G3 0.9814478 0.003210600     1
+## 5    G3 0.9814478 0.003210599     1
 ## 6    G4 0.9448803 0.026712699     1
 ## 7   G41 0.9421547 0.022629742     1
 ## 8   G44 0.9439237 0.018936623     1
 ## 9   G46 0.9474145 0.022383291     1
 ## 10  G47 0.9440316 0.023013543     1
 ## 11   G5 0.9439932 0.023007288     1
-## 12  G50 0.9621044 0.013702428     1
+## 12  G50 0.9621044 0.013702429     1
 ## 13  G57 0.9623835 0.013072980     1
 ## 14  G58 0.9579112 0.018540117     1
 ## 15   G7 0.9881595 0.001831611     1
 ## 16   G9 0.9493490 0.023795141     1</code></pre>
 <pre class="r"><code>data_summary(alphadiv, varname = &quot;simpson&quot;, groupnames = c(&quot;bleach.geno&quot;))</code></pre>
 <pre><code>##    bleach.geno   simpson           sd na.rm
-## 1        AugG1 0.8985110 0.0030650287     1
-## 2       AugG10 0.8994920 0.0020739429     1
-## 3       AugG13 0.9372064 0.0226981356     1
-## 4       AugG20 0.9028816 0.0011064639     1
-## 5        AugG3 0.9785151 0.0042772486     1
-## 6        AugG4 0.8986265 0.0013951876     1
-## 7       AugG41 0.9033603 0.0017941191     1
+## 1        AugG1 0.8985110 0.0030650285     1
+## 2       AugG10 0.8994920 0.0020739430     1
+## 3       AugG13 0.9372064 0.0226981355     1
+## 4       AugG20 0.9028816 0.0011064640     1
+## 5        AugG3 0.9785151 0.0042772485     1
+## 6        AugG4 0.8986265 0.0013951875     1
+## 7       AugG41 0.9033603 0.0017941190     1
 ## 8       AugG44 0.9119394 0.0059699990     1
-## 9       AugG46 0.9088121 0.0039852136     1
-## 10      AugG47 0.9041998 0.0021193428     1
-## 11       AugG5 0.9041583 0.0002980576     1
-## 12      AugG50 0.9390561 0.0078359306     1
+## 9       AugG46 0.9088121 0.0039852135     1
+## 10      AugG47 0.9041998 0.0021193425     1
+## 11       AugG5 0.9041583 0.0002980575     1
+## 12      AugG50 0.9390561 0.0078359310     1
 ## 13      AugG57 0.9401370 0.0045834340     1
-## 14      AugG58 0.9260006 0.0050797483     1
-## 15       AugG7 0.9857953 0.0029205637     1
-## 16       AugG9 0.9083939 0.0064816512     1
+## 14      AugG58 0.9260006 0.0050797485     1
+## 15       AugG7 0.9857953 0.0029205635     1
+## 16       AugG9 0.9083939 0.0064816515     1
 ## 17       SepG1 0.9824354 0.0093764775     1
 ## 18      SepG10 0.9872792 0.0004518680     1
-## 19      SepG13 0.9808379 0.0001277681     1
-## 20       SepG3 0.9843805 0.0051333548     1
-## 21       SepG4 0.9911342 0.0007928492     1
-## 22      SepG41 0.9809492 0.0077068259     1
-## 23      SepG44 0.9759079 0.0083638839     1
-## 24      SepG46 0.9860169 0.0031456269     1
-## 25      SepG47 0.9838634 0.0003213787     1
-## 26       SepG5 0.9838282 0.0015085787     1
-## 27      SepG50 0.9851527 0.0016388913     1
-## 28      SepG57 0.9846300 0.0038206644     1
-## 29      SepG58 0.9898219 0.0001883247     1
-## 30       SepG7 0.9905237 0.0006480907     1
-## 31       SepG9 0.9903042 0.0007657139     1</code></pre>
+## 19      SepG13 0.9808379 0.0001277680     1
+## 20       SepG3 0.9843805 0.0051333545     1
+## 21       SepG4 0.9911342 0.0007928495     1
+## 22      SepG41 0.9809492 0.0077068260     1
+## 23      SepG44 0.9759079 0.0083638835     1
+## 24      SepG46 0.9860169 0.0031456265     1
+## 25      SepG47 0.9838634 0.0003213790     1
+## 26       SepG5 0.9838282 0.0015085790     1
+## 27      SepG50 0.9851527 0.0016388915     1
+## 28      SepG57 0.9846300 0.0038206645     1
+## 29      SepG58 0.9898219 0.0001883245     1
+## 30       SepG7 0.9905237 0.0006480910     1
+## 31       SepG9 0.9903042 0.0007657135     1</code></pre>
 <pre class="r"><code># Shannon
 data_summary(alphadiv, varname = &quot;shannon&quot;, groupnames = c(&quot;bleach&quot;))</code></pre>
 <pre><code>##   bleach  shannon        sd na.rm
@@ -397,29 +406,29 @@ data_summary(alphadiv, varname = &quot;shannon&quot;, groupnames = c(&quot;bleac
 ## 3       AugG13 3.363653 0.495205005     1
 ## 4       AugG20 2.552361 0.006438988     1
 ## 5        AugG3 4.233849 0.132355441     1
-## 6        AugG4 2.554849 0.071057197     1
-## 7       AugG41 2.636016 0.071076621     1
+## 6        AugG4 2.554849 0.071057196     1
+## 7       AugG41 2.636016 0.071076620     1
 ## 8       AugG44 2.841150 0.229953137     1
 ## 9       AugG46 2.696294 0.118856851     1
-## 10      AugG47 2.726657 0.059728231     1
-## 11       AugG5 2.584682 0.015870110     1
+## 10      AugG47 2.726657 0.059728232     1
+## 11       AugG5 2.584682 0.015870111     1
 ## 12      AugG50 3.420916 0.083988443     1
 ## 13      AugG57 3.465897 0.009005448     1
 ## 14      AugG58 3.263463 0.097518193     1
 ## 15       AugG7 4.539892 0.107177525     1
 ## 16       AugG9 2.816917 0.100011305     1
-## 17       SepG1 4.627425 0.502798737     1
+## 17       SepG1 4.627425 0.502798736     1
 ## 18      SepG10 4.775928 0.170956982     1
 ## 19      SepG13 4.591689 0.048255646     1
-## 20       SepG3 4.576445 0.164046053     1
-## 21       SepG4 4.873744 0.048900704     1
+## 20       SepG3 4.576445 0.164046052     1
+## 21       SepG4 4.873744 0.048900703     1
 ## 22      SepG41 4.669143 0.298710591     1
 ## 23      SepG44 4.417037 0.476025850     1
 ## 24      SepG46 4.876178 0.117589796     1
 ## 25      SepG47 4.660774 0.000739132     1
 ## 26       SepG5 4.622884 0.082660087     1
-## 27      SepG50 4.724542 0.010112230     1
-## 28      SepG57 4.765860 0.331247762     1
+## 27      SepG50 4.724542 0.010112229     1
+## 28      SepG57 4.765860 0.331247761     1
 ## 29      SepG58 4.897688 0.148955675     1
 ## 30       SepG7 5.079501 0.070913081     1
 ## 31       SepG9 4.945361 0.074722371     1</code></pre>
@@ -498,154 +507,14 @@ kruskal.test(observed ~ bleach, data = alphadiv)</code></pre>
 ## 
 ## data:  observed by geno
 ## Kruskal-Wallis chi-squared = 10.927, df = 15, p-value = 0.7578</code></pre>
-<pre class="r"><code>kruskal.test(observed ~ bleach.geno, data = alphadiv)</code></pre>
+<pre class="r"><code>kruskal.test(observed ~ type, data = alphadiv)</code></pre>
 <pre><code>## 
 ##  Kruskal-Wallis rank sum test
 ## 
-## data:  observed by bleach.geno
-## Kruskal-Wallis chi-squared = 54.105, df = 30, p-value = 0.004475</code></pre>
-<pre class="r"><code>pairwise.wilcox.test(alphadiv$observed, alphadiv$bleach.geno, p.adjust.method = 'fdr')</code></pre>
-<pre><code>## Warning in wilcox.test.default(xi, xj, paired = paired, ...): cannot compute
-## exact p-value with ties
-
-## Warning in wilcox.test.default(xi, xj, paired = paired, ...): cannot compute
-## exact p-value with ties
-
-## Warning in wilcox.test.default(xi, xj, paired = paired, ...): cannot compute
-## exact p-value with ties
-
-## Warning in wilcox.test.default(xi, xj, paired = paired, ...): cannot compute
-## exact p-value with ties
-
-## Warning in wilcox.test.default(xi, xj, paired = paired, ...): cannot compute
-## exact p-value with ties
-
-## Warning in wilcox.test.default(xi, xj, paired = paired, ...): cannot compute
-## exact p-value with ties
-
-## Warning in wilcox.test.default(xi, xj, paired = paired, ...): cannot compute
-## exact p-value with ties
-
-## Warning in wilcox.test.default(xi, xj, paired = paired, ...): cannot compute
-## exact p-value with ties
-
-## Warning in wilcox.test.default(xi, xj, paired = paired, ...): cannot compute
-## exact p-value with ties
-
-## Warning in wilcox.test.default(xi, xj, paired = paired, ...): cannot compute
-## exact p-value with ties
-
-## Warning in wilcox.test.default(xi, xj, paired = paired, ...): cannot compute
-## exact p-value with ties
-
-## Warning in wilcox.test.default(xi, xj, paired = paired, ...): cannot compute
-## exact p-value with ties
-
-## Warning in wilcox.test.default(xi, xj, paired = paired, ...): cannot compute
-## exact p-value with ties
-
-## Warning in wilcox.test.default(xi, xj, paired = paired, ...): cannot compute
-## exact p-value with ties</code></pre>
-<pre><code>## 
-##  Pairwise comparisons using Wilcoxon rank sum test 
-## 
-## data:  alphadiv$observed and alphadiv$bleach.geno 
-## 
-##        AugG1 AugG10 AugG13 AugG20 AugG3 AugG4 AugG41 AugG44 AugG46 AugG47 AugG5
-## AugG10 0.79  -      -      -      -     -     -      -      -      -      -    
-## AugG13 0.45  0.45   -      -      -     -     -      -      -      -      -    
-## AugG20 0.55  0.45   0.45   -      -     -     -      -      -      -      -    
-## AugG3  0.45  0.45   1.00   0.45   -     -     -      -      -      -      -    
-## AugG4  1.00  1.00   0.45   1.00   0.45  -     -      -      -      -      -    
-## AugG41 0.55  0.45   0.45   1.00   0.45  0.79  -      -      -      -      -    
-## AugG44 0.45  0.45   1.00   0.45   1.00  0.79  0.79   -      -      -      -    
-## AugG46 0.55  0.45   0.79   1.00   1.00  0.79  1.00   0.79   -      -      -    
-## AugG47 0.45  0.45   0.45   0.45   0.45  0.45  0.79   1.00   1.00   -      -    
-## AugG5  0.45  0.45   0.45   0.45   0.45  1.00  1.00   0.45   1.00   0.45   -    
-## AugG50 0.45  0.45   0.45   0.45   0.45  0.45  0.45   1.00   0.45   0.45   0.45 
-## AugG57 0.45  0.45   0.79   0.45   0.45  0.45  0.45   1.00   0.45   0.45   0.45 
-## AugG58 0.45  0.45   0.45   0.45   0.45  0.45  0.45   1.00   0.45   0.45   0.45 
-## AugG7  0.45  0.45   0.45   0.45   0.45  0.45  0.45   1.00   0.45   0.45   0.45 
-## AugG9  0.45  0.45   0.45   0.45   0.45  0.45  0.79   1.00   1.00   1.00   0.45 
-## SepG1  0.45  0.45   0.79   0.45   0.45  0.45  0.45   0.79   0.45   0.45   0.45 
-## SepG10 0.45  0.45   0.45   0.45   0.45  0.45  0.45   0.79   0.45   0.45   0.45 
-## SepG13 0.45  0.45   0.45   0.45   0.45  0.45  0.45   0.45   0.45   0.45   0.45 
-## SepG3  0.45  0.45   0.45   0.45   0.45  0.45  0.45   1.00   0.45   0.45   0.45 
-## SepG4  0.45  0.45   0.45   0.45   0.45  0.45  0.45   0.45   0.45   0.45   0.45 
-## SepG41 0.45  0.45   0.45   0.45   0.45  0.45  0.45   0.45   0.45   0.45   0.45 
-## SepG44 0.45  0.45   0.45   0.45   0.45  0.45  0.45   0.45   0.45   0.45   0.45 
-## SepG46 0.45  0.45   0.45   0.45   0.45  0.45  0.45   0.45   0.45   0.45   0.45 
-## SepG47 0.45  0.45   0.45   0.45   0.45  0.45  0.45   0.45   0.45   0.45   0.45 
-## SepG5  0.45  0.45   0.45   0.45   0.45  0.45  0.45   0.45   0.45   0.45   0.45 
-## SepG50 0.45  0.45   0.45   0.45   0.45  0.45  0.45   0.45   0.45   0.45   0.45 
-## SepG57 0.45  0.45   0.45   0.45   0.45  0.45  0.45   0.45   0.45   0.45   0.45 
-## SepG58 0.45  0.45   0.45   0.45   0.45  0.45  0.45   0.79   0.45   0.45   0.45 
-## SepG7  0.45  0.45   0.45   0.45   0.45  0.45  0.45   0.45   0.45   0.45   0.45 
-## SepG9  0.45  0.45   0.45   0.45   0.45  0.45  0.45   0.45   0.45   0.45   0.45 
-##        AugG50 AugG57 AugG58 AugG7 AugG9 SepG1 SepG10 SepG13 SepG3 SepG4 SepG41
-## AugG10 -      -      -      -     -     -     -      -      -     -     -     
-## AugG13 -      -      -      -     -     -     -      -      -     -     -     
-## AugG20 -      -      -      -     -     -     -      -      -     -     -     
-## AugG3  -      -      -      -     -     -     -      -      -     -     -     
-## AugG4  -      -      -      -     -     -     -      -      -     -     -     
-## AugG41 -      -      -      -     -     -     -      -      -     -     -     
-## AugG44 -      -      -      -     -     -     -      -      -     -     -     
-## AugG46 -      -      -      -     -     -     -      -      -     -     -     
-## AugG47 -      -      -      -     -     -     -      -      -     -     -     
-## AugG5  -      -      -      -     -     -     -      -      -     -     -     
-## AugG50 -      -      -      -     -     -     -      -      -     -     -     
-## AugG57 0.55   -      -      -     -     -     -      -      -     -     -     
-## AugG58 0.45   0.45   -      -     -     -     -      -      -     -     -     
-## AugG7  1.00   0.79   0.45   -     -     -     -      -      -     -     -     
-## AugG9  0.45   0.45   0.45   0.45  -     -     -      -      -     -     -     
-## SepG1  1.00   1.00   1.00   1.00  0.45  -     -      -      -     -     -     
-## SepG10 0.45   0.45   0.79   0.45  0.45  0.79  -      -      -     -     -     
-## SepG13 0.45   0.45   0.45   0.45  0.45  1.00  1.00   -      -     -     -     
-## SepG3  0.55   0.45   0.79   0.55  0.45  1.00  0.79   0.45   -     -     -     
-## SepG4  0.45   0.45   0.45   0.45  0.45  1.00  1.00   0.45   0.45  -     -     
-## SepG41 0.45   0.45   0.45   0.45  0.45  0.55  1.00   0.45   0.45  0.45  -     
-## SepG44 0.45   0.45   0.45   0.45  0.45  0.79  0.79   1.00   0.45  1.00  1.00  
-## SepG46 0.45   0.45   0.45   0.45  0.45  0.79  1.00   0.45   0.45  0.45  1.00  
-## SepG47 0.45   0.45   0.45   0.45  0.45  0.79  1.00   0.45   0.45  0.45  1.00  
-## SepG5  0.45   0.45   0.45   0.45  0.45  1.00  1.00   0.45   0.45  0.45  0.45  
-## SepG50 0.45   0.45   0.45   0.45  0.45  0.79  1.00   1.00   0.45  0.45  1.00  
-## SepG57 0.45   0.45   0.45   0.45  0.45  0.79  1.00   1.00   0.45  0.45  1.00  
-## SepG58 0.45   0.45   0.55   0.45  0.45  0.79  1.00   1.00   0.45  1.00  1.00  
-## SepG7  0.45   0.45   0.45   0.45  0.45  0.79  0.79   0.79   0.45  0.45  1.00  
-## SepG9  0.45   0.45   0.45   0.45  0.45  1.00  1.00   0.79   0.45  0.45  0.45  
-##        SepG44 SepG46 SepG47 SepG5 SepG50 SepG57 SepG58 SepG7
-## AugG10 -      -      -      -     -      -      -      -    
-## AugG13 -      -      -      -     -      -      -      -    
-## AugG20 -      -      -      -     -      -      -      -    
-## AugG3  -      -      -      -     -      -      -      -    
-## AugG4  -      -      -      -     -      -      -      -    
-## AugG41 -      -      -      -     -      -      -      -    
-## AugG44 -      -      -      -     -      -      -      -    
-## AugG46 -      -      -      -     -      -      -      -    
-## AugG47 -      -      -      -     -      -      -      -    
-## AugG5  -      -      -      -     -      -      -      -    
-## AugG50 -      -      -      -     -      -      -      -    
-## AugG57 -      -      -      -     -      -      -      -    
-## AugG58 -      -      -      -     -      -      -      -    
-## AugG7  -      -      -      -     -      -      -      -    
-## AugG9  -      -      -      -     -      -      -      -    
-## SepG1  -      -      -      -     -      -      -      -    
-## SepG10 -      -      -      -     -      -      -      -    
-## SepG13 -      -      -      -     -      -      -      -    
-## SepG3  -      -      -      -     -      -      -      -    
-## SepG4  -      -      -      -     -      -      -      -    
-## SepG41 -      -      -      -     -      -      -      -    
-## SepG44 -      -      -      -     -      -      -      -    
-## SepG46 1.00   -      -      -     -      -      -      -    
-## SepG47 1.00   1.00   -      -     -      -      -      -    
-## SepG5  1.00   0.45   0.45   -     -      -      -      -    
-## SepG50 1.00   0.79   0.79   0.45  -      -      -      -    
-## SepG57 1.00   1.00   1.00   0.45  1.00   -      -      -    
-## SepG58 0.79   0.79   0.79   1.00  0.79   0.79   -      -    
-## SepG7  0.79   1.00   1.00   0.45  0.79   0.79   0.79   -    
-## SepG9  1.00   0.45   0.45   0.45  1.00   1.00   1.00   0.79 
-## 
-## P value adjustment method: fdr</code></pre>
+## data:  observed by type
+## Kruskal-Wallis chi-squared = 0.14293, df = 1, p-value = 0.7054</code></pre>
+<pre class="r"><code>#kruskal.test(observed ~ bleach.geno, data = alphadiv)
+#pairwise.wilcox.test(alphadiv$observed, alphadiv$bleach.geno, p.adjust.method = 'fdr')</code></pre>
 </div>
 <div id="simpsons-index" class="section level4">
 <h4>Simpson’s Index</h4>
@@ -661,113 +530,13 @@ kruskal.test(observed ~ bleach, data = alphadiv)</code></pre>
 ## 
 ## data:  simpson by geno
 ## Kruskal-Wallis chi-squared = 11.81, df = 15, p-value = 0.6933</code></pre>
-<pre class="r"><code>kruskal.test(simpson ~ bleach.geno, data = alphadiv)</code></pre>
+<pre class="r"><code>kruskal.test(simpson ~ type, data = alphadiv)</code></pre>
 <pre><code>## 
 ##  Kruskal-Wallis rank sum test
 ## 
-## data:  simpson by bleach.geno
-## Kruskal-Wallis chi-squared = 56.28, df = 30, p-value = 0.002535</code></pre>
-<pre class="r"><code>pairwise.wilcox.test(alphadiv$simpson, alphadiv$bleach.geno, p.adjust.method = 'fdr')</code></pre>
-<pre><code>## 
-##  Pairwise comparisons using Wilcoxon rank sum test 
-## 
-## data:  alphadiv$simpson and alphadiv$bleach.geno 
-## 
-##        AugG1 AugG10 AugG13 AugG20 AugG3 AugG4 AugG41 AugG44 AugG46 AugG47 AugG5
-## AugG10 1.00  -      -      -      -     -     -      -      -      -      -    
-## AugG13 0.42  0.42   -      -      -     -     -      -      -      -      -    
-## AugG20 0.42  0.42   0.42   -      -     -     -      -      -      -      -    
-## AugG3  0.42  0.42   0.42   0.42   -     -     -      -      -      -      -    
-## AugG4  1.00  0.76   0.42   0.42   0.42  -     -      -      -      -      -    
-## AugG41 0.76  0.42   0.42   1.00   0.42  0.42  -      -      -      -      -    
-## AugG44 0.42  0.42   0.76   0.42   0.42  0.42  0.42   -      -      -      -    
-## AugG46 0.42  0.42   0.42   0.42   0.42  0.42  0.76   0.76   -      -      -    
-## AugG47 0.42  0.42   0.42   0.76   0.42  0.42  0.76   0.76   0.76   -      -    
-## AugG5  0.42  0.42   0.42   0.76   0.42  0.42  1.00   0.42   0.42   1.00   -    
-## AugG50 0.42  0.42   1.00   0.42   0.42  0.42  0.42   0.42   0.42   0.42   0.42 
-## AugG57 0.42  0.42   1.00   0.42   0.42  0.42  0.42   0.42   0.42   0.42   0.42 
-## AugG58 0.42  0.42   1.00   0.42   0.42  0.42  0.42   0.42   0.42   0.42   0.42 
-## AugG7  0.42  0.42   0.42   0.42   0.42  0.42  0.42   0.42   0.42   0.42   0.42 
-## AugG9  0.42  0.42   0.76   0.76   0.42  0.42  0.76   0.76   1.00   1.00   1.00 
-## SepG1  0.42  0.42   0.42   0.42   1.00  0.42  0.42   0.42   0.42   0.42   0.42 
-## SepG10 0.42  0.42   0.42   0.42   0.42  0.42  0.42   0.42   0.42   0.42   0.42 
-## SepG13 0.42  0.42   0.42   0.42   1.00  0.42  0.42   0.42   0.42   0.42   0.42 
-## SepG3  0.42  0.42   0.42   0.42   0.76  0.42  0.42   0.42   0.42   0.42   0.42 
-## SepG4  0.42  0.42   0.42   0.42   0.42  0.42  0.42   0.42   0.42   0.42   0.42 
-## SepG41 0.42  0.42   0.42   0.42   1.00  0.42  0.42   0.42   0.42   0.42   0.42 
-## SepG44 0.42  0.42   0.42   0.42   1.00  0.42  0.42   0.42   0.42   0.42   0.42 
-## SepG46 0.42  0.42   0.42   0.42   0.42  0.42  0.42   0.42   0.42   0.42   0.42 
-## SepG47 0.42  0.42   0.42   0.42   0.42  0.42  0.42   0.42   0.42   0.42   0.42 
-## SepG5  0.42  0.42   0.42   0.42   0.76  0.42  0.42   0.42   0.42   0.42   0.42 
-## SepG50 0.42  0.42   0.42   0.42   0.42  0.42  0.42   0.42   0.42   0.42   0.42 
-## SepG57 0.42  0.42   0.42   0.42   0.76  0.42  0.42   0.42   0.42   0.42   0.42 
-## SepG58 0.42  0.42   0.42   0.42   0.42  0.42  0.42   0.42   0.42   0.42   0.42 
-## SepG7  0.42  0.42   0.42   0.42   0.42  0.42  0.42   0.42   0.42   0.42   0.42 
-## SepG9  0.42  0.42   0.42   0.42   0.42  0.42  0.42   0.42   0.42   0.42   0.42 
-##        AugG50 AugG57 AugG58 AugG7 AugG9 SepG1 SepG10 SepG13 SepG3 SepG4 SepG41
-## AugG10 -      -      -      -     -     -     -      -      -     -     -     
-## AugG13 -      -      -      -     -     -     -      -      -     -     -     
-## AugG20 -      -      -      -     -     -     -      -      -     -     -     
-## AugG3  -      -      -      -     -     -     -      -      -     -     -     
-## AugG4  -      -      -      -     -     -     -      -      -     -     -     
-## AugG41 -      -      -      -     -     -     -      -      -     -     -     
-## AugG44 -      -      -      -     -     -     -      -      -     -     -     
-## AugG46 -      -      -      -     -     -     -      -      -     -     -     
-## AugG47 -      -      -      -     -     -     -      -      -     -     -     
-## AugG5  -      -      -      -     -     -     -      -      -     -     -     
-## AugG50 -      -      -      -     -     -     -      -      -     -     -     
-## AugG57 1.00   -      -      -     -     -     -      -      -     -     -     
-## AugG58 0.42   0.42   -      -     -     -     -      -      -     -     -     
-## AugG7  0.42   0.42   0.42   -     -     -     -      -      -     -     -     
-## AugG9  0.42   0.42   0.42   0.42  -     -     -      -      -     -     -     
-## SepG1  0.42   0.42   0.42   1.00  0.42  -     -      -      -     -     -     
-## SepG10 0.42   0.42   0.42   1.00  0.42  1.00  -      -      -     -     -     
-## SepG13 0.42   0.42   0.42   0.42  0.42  1.00  0.42   -      -     -     -     
-## SepG3  0.42   0.42   0.42   1.00  0.42  1.00  1.00   1.00   -     -     -     
-## SepG4  0.42   0.42   0.42   0.42  0.42  0.76  0.42   0.42   0.42  -     -     
-## SepG41 0.42   0.42   0.42   0.76  0.42  1.00  1.00   1.00   0.76  0.42  -     
-## SepG44 0.42   0.42   0.42   0.76  0.42  0.76  0.42   1.00   0.76  0.42  0.76  
-## SepG46 0.42   0.42   0.42   1.00  0.42  1.00  1.00   0.42   1.00  0.42  0.76  
-## SepG47 0.42   0.42   0.42   1.00  0.42  1.00  0.42   0.42   1.00  0.42  1.00  
-## SepG5  0.42   0.42   0.42   0.76  0.42  1.00  0.42   0.42   1.00  0.42  1.00  
-## SepG50 0.42   0.42   0.42   1.00  0.42  1.00  0.42   0.42   1.00  0.42  1.00  
-## SepG57 0.42   0.42   0.42   0.76  0.42  1.00  1.00   0.76   1.00  0.42  1.00  
-## SepG58 0.42   0.42   0.42   0.42  0.42  1.00  0.42   0.42   0.42  0.42  0.42  
-## SepG7  0.42   0.42   0.42   0.42  0.42  1.00  0.42   0.42   0.42  0.76  0.42  
-## SepG9  0.42   0.42   0.42   0.42  0.42  1.00  0.42   0.42   0.42  0.76  0.42  
-##        SepG44 SepG46 SepG47 SepG5 SepG50 SepG57 SepG58 SepG7
-## AugG10 -      -      -      -     -      -      -      -    
-## AugG13 -      -      -      -     -      -      -      -    
-## AugG20 -      -      -      -     -      -      -      -    
-## AugG3  -      -      -      -     -      -      -      -    
-## AugG4  -      -      -      -     -      -      -      -    
-## AugG41 -      -      -      -     -      -      -      -    
-## AugG44 -      -      -      -     -      -      -      -    
-## AugG46 -      -      -      -     -      -      -      -    
-## AugG47 -      -      -      -     -      -      -      -    
-## AugG5  -      -      -      -     -      -      -      -    
-## AugG50 -      -      -      -     -      -      -      -    
-## AugG57 -      -      -      -     -      -      -      -    
-## AugG58 -      -      -      -     -      -      -      -    
-## AugG7  -      -      -      -     -      -      -      -    
-## AugG9  -      -      -      -     -      -      -      -    
-## SepG1  -      -      -      -     -      -      -      -    
-## SepG10 -      -      -      -     -      -      -      -    
-## SepG13 -      -      -      -     -      -      -      -    
-## SepG3  -      -      -      -     -      -      -      -    
-## SepG4  -      -      -      -     -      -      -      -    
-## SepG41 -      -      -      -     -      -      -      -    
-## SepG44 -      -      -      -     -      -      -      -    
-## SepG46 0.76   -      -      -     -      -      -      -    
-## SepG47 1.00   1.00   -      -     -      -      -      -    
-## SepG5  0.76   0.76   1.00   -     -      -      -      -    
-## SepG50 0.76   1.00   1.00   0.76  -      -      -      -    
-## SepG57 0.76   0.76   1.00   1.00  1.00   -      -      -    
-## SepG58 0.42   0.42   0.42   0.42  0.42   0.42   -      -    
-## SepG7  0.42   0.42   0.42   0.42  0.42   0.42   0.76   -    
-## SepG9  0.42   0.42   0.42   0.42  0.42   0.42   1.00   0.76 
-## 
-## P value adjustment method: fdr</code></pre>
+## data:  simpson by type
+## Kruskal-Wallis chi-squared = 5.4325, df = 1, p-value = 0.01976</code></pre>
+<pre class="r"><code>#pairwise.wilcox.test(alphadiv$simpson, alphadiv$bleach.geno, p.adjust.method = 'fdr')</code></pre>
 </div>
 <div id="shannons-index" class="section level4">
 <h4>Shannon’s Index</h4>
@@ -783,113 +552,13 @@ kruskal.test(observed ~ bleach, data = alphadiv)</code></pre>
 ## 
 ## data:  shannon by geno
 ## Kruskal-Wallis chi-squared = 11.324, df = 15, p-value = 0.7293</code></pre>
-<pre class="r"><code>kruskal.test(shannon ~ bleach.geno, data = alphadiv)</code></pre>
+<pre class="r"><code>kruskal.test(shannon ~ type, data = alphadiv)</code></pre>
 <pre><code>## 
 ##  Kruskal-Wallis rank sum test
 ## 
-## data:  shannon by bleach.geno
-## Kruskal-Wallis chi-squared = 55.275, df = 30, p-value = 0.003304</code></pre>
-<pre class="r"><code>pairwise.wilcox.test(alphadiv$shannon, alphadiv$bleach.geno, p.adjust.method = 'fdr')</code></pre>
-<pre><code>## 
-##  Pairwise comparisons using Wilcoxon rank sum test 
-## 
-## data:  alphadiv$shannon and alphadiv$bleach.geno 
-## 
-##        AugG1 AugG10 AugG13 AugG20 AugG3 AugG4 AugG41 AugG44 AugG46 AugG47 AugG5
-## AugG10 1.00  -      -      -      -     -     -      -      -      -      -    
-## AugG13 0.43  0.43   -      -      -     -     -      -      -      -      -    
-## AugG20 0.43  1.00   0.43   -      -     -     -      -      -      -      -    
-## AugG3  0.43  0.43   0.43   0.43   -     -     -      -      -      -      -    
-## AugG4  1.00  1.00   0.43   1.00   0.43  -     -      -      -      -      -    
-## AugG41 0.43  0.43   0.43   0.43   0.43  0.78  -      -      -      -      -    
-## AugG44 0.43  0.43   0.78   0.43   0.43  0.78  0.78   -      -      -      -    
-## AugG46 0.43  0.43   0.43   0.43   0.43  0.78  0.78   0.78   -      -      -    
-## AugG47 0.43  0.43   0.43   0.43   0.43  0.43  0.78   1.00   1.00   -      -    
-## AugG5  0.43  0.43   0.43   0.43   0.43  1.00  1.00   0.43   0.78   0.43   -    
-## AugG50 0.43  0.43   1.00   0.43   0.43  0.43  0.43   0.43   0.43   0.43   0.43 
-## AugG57 0.43  0.43   1.00   0.43   0.43  0.43  0.43   0.43   0.43   0.43   0.43 
-## AugG58 0.43  0.43   1.00   0.43   0.43  0.43  0.43   0.43   0.43   0.43   0.43 
-## AugG7  0.43  0.43   0.43   0.43   0.43  0.43  0.43   0.43   0.43   0.43   0.43 
-## AugG9  0.43  0.43   0.78   0.43   0.43  0.43  0.43   1.00   0.78   0.78   0.43 
-## SepG1  0.43  0.43   0.43   0.43   0.78  0.43  0.43   0.43   0.43   0.43   0.43 
-## SepG10 0.43  0.43   0.43   0.43   0.43  0.43  0.43   0.43   0.43   0.43   0.43 
-## SepG13 0.43  0.43   0.43   0.43   0.43  0.43  0.43   0.43   0.43   0.43   0.43 
-## SepG3  0.43  0.43   0.43   0.43   0.43  0.43  0.43   0.43   0.43   0.43   0.43 
-## SepG4  0.43  0.43   0.43   0.43   0.43  0.43  0.43   0.43   0.43   0.43   0.43 
-## SepG41 0.43  0.43   0.43   0.43   0.43  0.43  0.43   0.43   0.43   0.43   0.43 
-## SepG44 0.43  0.43   0.43   0.43   1.00  0.43  0.43   0.43   0.43   0.43   0.43 
-## SepG46 0.43  0.43   0.43   0.43   0.43  0.43  0.43   0.43   0.43   0.43   0.43 
-## SepG47 0.43  0.43   0.43   0.43   0.43  0.43  0.43   0.43   0.43   0.43   0.43 
-## SepG5  0.43  0.43   0.43   0.43   0.43  0.43  0.43   0.43   0.43   0.43   0.43 
-## SepG50 0.43  0.43   0.43   0.43   0.43  0.43  0.43   0.43   0.43   0.43   0.43 
-## SepG57 0.43  0.43   0.43   0.43   0.43  0.43  0.43   0.43   0.43   0.43   0.43 
-## SepG58 0.43  0.43   0.43   0.43   0.43  0.43  0.43   0.43   0.43   0.43   0.43 
-## SepG7  0.43  0.43   0.43   0.43   0.43  0.43  0.43   0.43   0.43   0.43   0.43 
-## SepG9  0.43  0.43   0.43   0.43   0.43  0.43  0.43   0.43   0.43   0.43   0.43 
-##        AugG50 AugG57 AugG58 AugG7 AugG9 SepG1 SepG10 SepG13 SepG3 SepG4 SepG41
-## AugG10 -      -      -      -     -     -     -      -      -     -     -     
-## AugG13 -      -      -      -     -     -     -      -      -     -     -     
-## AugG20 -      -      -      -     -     -     -      -      -     -     -     
-## AugG3  -      -      -      -     -     -     -      -      -     -     -     
-## AugG4  -      -      -      -     -     -     -      -      -     -     -     
-## AugG41 -      -      -      -     -     -     -      -      -     -     -     
-## AugG44 -      -      -      -     -     -     -      -      -     -     -     
-## AugG46 -      -      -      -     -     -     -      -      -     -     -     
-## AugG47 -      -      -      -     -     -     -      -      -     -     -     
-## AugG5  -      -      -      -     -     -     -      -      -     -     -     
-## AugG50 -      -      -      -     -     -     -      -      -     -     -     
-## AugG57 1.00   -      -      -     -     -     -      -      -     -     -     
-## AugG58 0.78   0.43   -      -     -     -     -      -      -     -     -     
-## AugG7  0.43   0.43   0.43   -     -     -     -      -      -     -     -     
-## AugG9  0.43   0.43   0.43   0.43  -     -     -      -      -     -     -     
-## SepG1  0.43   0.43   0.43   1.00  0.43  -     -      -      -     -     -     
-## SepG10 0.43   0.43   0.43   0.78  0.43  1.00  -      -      -     -     -     
-## SepG13 0.43   0.43   0.43   1.00  0.43  1.00  0.78   -      -     -     -     
-## SepG3  0.43   0.43   0.43   1.00  0.43  1.00  0.78   1.00   -     -     -     
-## SepG4  0.43   0.43   0.43   0.43  0.43  1.00  1.00   0.43   0.43  -     -     
-## SepG41 0.43   0.43   0.43   1.00  0.43  1.00  1.00   1.00   1.00  1.00  -     
-## SepG44 0.43   0.43   0.43   1.00  0.43  0.78  0.78   1.00   1.00  0.78  0.78  
-## SepG46 0.43   0.43   0.43   0.43  0.43  1.00  0.78   0.43   0.43  1.00  0.78  
-## SepG47 0.43   0.43   0.43   0.43  0.43  1.00  1.00   0.43   1.00  0.43  1.00  
-## SepG5  0.43   0.43   0.43   0.78  0.43  1.00  0.78   1.00   1.00  0.43  1.00  
-## SepG50 0.43   0.43   0.43   0.43  0.43  1.00  1.00   0.43   1.00  0.43  1.00  
-## SepG57 0.43   0.43   0.43   0.78  0.43  1.00  1.00   1.00   0.78  1.00  0.78  
-## SepG58 0.43   0.43   0.43   0.43  0.43  1.00  0.78   0.43   0.43  1.00  0.78  
-## SepG7  0.43   0.43   0.43   0.43  0.43  0.78  0.43   0.43   0.43  0.43  0.43  
-## SepG9  0.43   0.43   0.43   0.43  0.43  1.00  0.78   0.43   0.43  0.78  0.78  
-##        SepG44 SepG46 SepG47 SepG5 SepG50 SepG57 SepG58 SepG7
-## AugG10 -      -      -      -     -      -      -      -    
-## AugG13 -      -      -      -     -      -      -      -    
-## AugG20 -      -      -      -     -      -      -      -    
-## AugG3  -      -      -      -     -      -      -      -    
-## AugG4  -      -      -      -     -      -      -      -    
-## AugG41 -      -      -      -     -      -      -      -    
-## AugG44 -      -      -      -     -      -      -      -    
-## AugG46 -      -      -      -     -      -      -      -    
-## AugG47 -      -      -      -     -      -      -      -    
-## AugG5  -      -      -      -     -      -      -      -    
-## AugG50 -      -      -      -     -      -      -      -    
-## AugG57 -      -      -      -     -      -      -      -    
-## AugG58 -      -      -      -     -      -      -      -    
-## AugG7  -      -      -      -     -      -      -      -    
-## AugG9  -      -      -      -     -      -      -      -    
-## SepG1  -      -      -      -     -      -      -      -    
-## SepG10 -      -      -      -     -      -      -      -    
-## SepG13 -      -      -      -     -      -      -      -    
-## SepG3  -      -      -      -     -      -      -      -    
-## SepG4  -      -      -      -     -      -      -      -    
-## SepG41 -      -      -      -     -      -      -      -    
-## SepG44 -      -      -      -     -      -      -      -    
-## SepG46 0.78   -      -      -     -      -      -      -    
-## SepG47 1.00   0.43   -      -     -      -      -      -    
-## SepG5  1.00   0.43   1.00   -     -      -      -      -    
-## SepG50 1.00   0.43   0.43   0.43  -      -      -      -    
-## SepG57 0.78   1.00   1.00   1.00  1.00   -      -      -    
-## SepG58 0.78   1.00   0.43   0.43  0.43   1.00   -      -    
-## SepG7  0.43   0.43   0.43   0.43  0.43   0.78   0.78   -    
-## SepG9  0.78   0.78   0.43   0.43  0.43   1.00   1.00   0.78 
-## 
-## P value adjustment method: fdr</code></pre>
+## data:  shannon by type
+## Kruskal-Wallis chi-squared = 3.261, df = 1, p-value = 0.07094</code></pre>
+<pre class="r"><code>#pairwise.wilcox.test(alphadiv$shannon, alphadiv$bleach.geno, p.adjust.method = 'fdr')</code></pre>
 </div>
 <div id="faith-pd" class="section level4">
 <h4>Faith PD</h4>
@@ -905,113 +574,13 @@ kruskal.test(observed ~ bleach, data = alphadiv)</code></pre>
 ## 
 ## data:  faithPD by geno
 ## Kruskal-Wallis chi-squared = 9.8679, df = 15, p-value = 0.828</code></pre>
-<pre class="r"><code>kruskal.test(faithPD ~ bleach.geno, data = alphadiv)</code></pre>
+<pre class="r"><code>kruskal.test(faithPD ~ type, data = alphadiv)</code></pre>
 <pre><code>## 
 ##  Kruskal-Wallis rank sum test
 ## 
-## data:  faithPD by bleach.geno
-## Kruskal-Wallis chi-squared = 49.318, df = 30, p-value = 0.01458</code></pre>
-<pre class="r"><code>pairwise.wilcox.test(alphadiv$faithPD, alphadiv$bleach.geno, p.adjust.method = 'fdr')</code></pre>
-<pre><code>## 
-##  Pairwise comparisons using Wilcoxon rank sum test 
-## 
-## data:  alphadiv$faithPD and alphadiv$bleach.geno 
-## 
-##        AugG1 AugG10 AugG13 AugG20 AugG3 AugG4 AugG41 AugG44 AugG46 AugG47 AugG5
-## AugG10 1.00  -      -      -      -     -     -      -      -      -      -    
-## AugG13 0.55  0.55   -      -      -     -     -      -      -      -      -    
-## AugG20 0.55  0.79   0.55   -      -     -     -      -      -      -      -    
-## AugG3  0.55  0.55   1.00   0.79   -     -     -      -      -      -      -    
-## AugG4  1.00  1.00   0.55   0.79   0.55  -     -      -      -      -      -    
-## AugG41 0.55  0.79   0.55   0.79   0.79  0.79  -      -      -      -      -    
-## AugG44 0.55  0.55   0.79   0.79   1.00  0.55  0.79   -      -      -      -    
-## AugG46 1.00  1.00   1.00   1.00   1.00  1.00  1.00   1.00   -      -      -    
-## AugG47 0.55  0.55   0.79   0.55   0.79  0.55  0.55   0.79   0.79   -      -    
-## AugG5  0.55  0.55   0.55   1.00   0.55  1.00  1.00   0.55   1.00   0.55   -    
-## AugG50 0.55  0.55   0.79   0.79   0.79  0.79  0.79   0.79   1.00   0.55   0.55 
-## AugG57 0.55  0.55   0.79   0.55   0.79  0.55  0.55   0.79   0.79   1.00   0.55 
-## AugG58 0.55  0.55   0.55   0.55   0.55  0.55  0.55   0.55   0.55   0.79   0.55 
-## AugG7  0.55  0.55   1.00   0.55   0.79  0.55  0.55   0.79   0.79   0.79   0.55 
-## AugG9  0.55  0.79   0.55   1.00   0.79  0.79  1.00   0.79   1.00   0.55   1.00 
-## SepG1  0.55  0.55   0.79   0.55   0.79  0.55  0.55   0.55   0.79   0.79   0.55 
-## SepG10 0.55  0.55   0.55   0.55   0.55  0.55  0.55   0.55   0.55   0.79   0.55 
-## SepG13 0.55  0.55   0.55   0.55   0.55  0.55  0.55   0.55   0.55   0.55   0.55 
-## SepG3  0.55  0.55   0.79   0.55   0.79  0.55  0.55   0.79   0.79   0.79   0.55 
-## SepG4  0.55  0.55   0.55   0.55   0.55  0.55  0.55   0.55   0.55   0.79   0.55 
-## SepG41 0.55  0.55   0.55   0.55   0.55  0.55  0.55   0.55   0.55   0.55   0.55 
-## SepG44 0.55  0.55   0.79   0.55   0.79  0.55  0.55   0.79   0.79   1.00   0.55 
-## SepG46 0.55  0.55   0.55   0.55   0.55  0.55  0.55   0.55   0.55   0.79   0.55 
-## SepG47 0.55  0.55   0.79   0.55   0.79  0.55  0.55   0.79   0.79   1.00   0.55 
-## SepG5  0.55  0.55   0.55   0.55   0.55  0.55  0.55   0.55   0.55   0.55   0.55 
-## SepG50 0.55  0.55   0.55   0.55   0.55  0.55  0.55   0.55   0.55   0.55   0.55 
-## SepG57 0.55  0.55   0.55   0.55   0.55  0.55  0.55   0.55   0.55   0.79   0.55 
-## SepG58 0.55  0.55   0.55   0.55   0.55  0.55  0.55   0.55   0.55   0.55   0.55 
-## SepG7  0.55  0.55   0.55   0.55   0.55  0.55  0.55   0.55   0.55   0.55   0.55 
-## SepG9  0.55  0.55   0.55   0.55   0.55  0.55  0.55   0.55   0.55   0.55   0.55 
-##        AugG50 AugG57 AugG58 AugG7 AugG9 SepG1 SepG10 SepG13 SepG3 SepG4 SepG41
-## AugG10 -      -      -      -     -     -     -      -      -     -     -     
-## AugG13 -      -      -      -     -     -     -      -      -     -     -     
-## AugG20 -      -      -      -     -     -     -      -      -     -     -     
-## AugG3  -      -      -      -     -     -     -      -      -     -     -     
-## AugG4  -      -      -      -     -     -     -      -      -     -     -     
-## AugG41 -      -      -      -     -     -     -      -      -     -     -     
-## AugG44 -      -      -      -     -     -     -      -      -     -     -     
-## AugG46 -      -      -      -     -     -     -      -      -     -     -     
-## AugG47 -      -      -      -     -     -     -      -      -     -     -     
-## AugG5  -      -      -      -     -     -     -      -      -     -     -     
-## AugG50 -      -      -      -     -     -     -      -      -     -     -     
-## AugG57 0.79   -      -      -     -     -     -      -      -     -     -     
-## AugG58 0.55   1.00   -      -     -     -     -      -      -     -     -     
-## AugG7  0.79   0.79   0.79   -     -     -     -      -      -     -     -     
-## AugG9  0.79   0.55   0.55   0.55  -     -     -      -      -     -     -     
-## SepG1  0.55   0.79   1.00   0.79  0.55  -     -      -      -     -     -     
-## SepG10 0.55   0.79   0.79   0.55  0.55  1.00  -      -      -     -     -     
-## SepG13 0.55   0.55   0.55   0.55  0.55  1.00  0.79   -      -     -     -     
-## SepG3  0.55   1.00   0.79   1.00  0.55  0.79  0.55   0.55   -     -     -     
-## SepG4  0.55   1.00   0.79   0.79  0.55  1.00  0.79   0.55   0.79  -     -     
-## SepG41 0.55   0.55   0.55   0.55  0.55  1.00  0.55   0.79   0.55  0.55  -     
-## SepG44 0.55   0.79   1.00   0.79  0.55  1.00  1.00   1.00   1.00  1.00  1.00  
-## SepG46 0.55   0.79   0.79   0.55  0.55  1.00  0.79   1.00   0.55  0.79  1.00  
-## SepG47 0.55   0.79   1.00   0.79  0.55  0.79  0.79   0.79   0.79  1.00  0.55  
-## SepG5  0.55   0.55   0.55   0.55  0.55  1.00  1.00   0.55   0.55  0.55  0.55  
-## SepG50 0.55   0.79   0.55   0.55  0.55  1.00  0.79   1.00   0.55  0.79  0.79  
-## SepG57 0.55   0.79   0.79   0.55  0.55  1.00  0.79   1.00   0.55  0.79  0.79  
-## SepG58 0.55   0.79   0.55   0.55  0.55  0.79  0.79   1.00   0.55  0.55  1.00  
-## SepG7  0.55   0.55   0.55   0.55  0.55  0.79  0.55   0.55   0.55  0.55  0.79  
-## SepG9  0.55   0.55   0.55   0.55  0.55  1.00  0.55   0.55   0.55  0.55  0.79  
-##        SepG44 SepG46 SepG47 SepG5 SepG50 SepG57 SepG58 SepG7
-## AugG10 -      -      -      -     -      -      -      -    
-## AugG13 -      -      -      -     -      -      -      -    
-## AugG20 -      -      -      -     -      -      -      -    
-## AugG3  -      -      -      -     -      -      -      -    
-## AugG4  -      -      -      -     -      -      -      -    
-## AugG41 -      -      -      -     -      -      -      -    
-## AugG44 -      -      -      -     -      -      -      -    
-## AugG46 -      -      -      -     -      -      -      -    
-## AugG47 -      -      -      -     -      -      -      -    
-## AugG5  -      -      -      -     -      -      -      -    
-## AugG50 -      -      -      -     -      -      -      -    
-## AugG57 -      -      -      -     -      -      -      -    
-## AugG58 -      -      -      -     -      -      -      -    
-## AugG7  -      -      -      -     -      -      -      -    
-## AugG9  -      -      -      -     -      -      -      -    
-## SepG1  -      -      -      -     -      -      -      -    
-## SepG10 -      -      -      -     -      -      -      -    
-## SepG13 -      -      -      -     -      -      -      -    
-## SepG3  -      -      -      -     -      -      -      -    
-## SepG4  -      -      -      -     -      -      -      -    
-## SepG41 -      -      -      -     -      -      -      -    
-## SepG44 -      -      -      -     -      -      -      -    
-## SepG46 1.00   -      -      -     -      -      -      -    
-## SepG47 1.00   0.79   -      -     -      -      -      -    
-## SepG5  1.00   1.00   1.00   -     -      -      -      -    
-## SepG50 1.00   1.00   0.79   1.00  -      -      -      -    
-## SepG57 1.00   0.79   0.79   1.00  1.00   -      -      -    
-## SepG58 1.00   0.79   0.79   1.00  0.79   0.79   -      -    
-## SepG7  1.00   0.79   0.55   0.55  0.55   0.79   1.00   -    
-## SepG9  1.00   1.00   0.55   0.55  0.55   0.79   1.00   1.00 
-## 
-## P value adjustment method: fdr</code></pre>
+## data:  faithPD by type
+## Kruskal-Wallis chi-squared = 0.12743, df = 1, p-value = 0.7211</code></pre>
+<pre class="r"><code>#pairwise.wilcox.test(alphadiv$faithPD, alphadiv$bleach.geno, p.adjust.method = 'fdr')</code></pre>
 </div>
 </div>
 <div id="parametric-tests-for-significance" class="section level3">
@@ -1055,7 +624,7 @@ bartlett.test(sqrt(observed) ~ bleach, data = alphadiv)</code></pre>
 <pre class="r"><code>## not significant indicates that the variances in each of the groups are the same
 
 # proceeding with anova tests
-summary(aov(sqrt(observed) ~ geno*bleach, alphadiv)) # results disagree with the kruskal wallis test</code></pre>
+summary(aov(sqrt(observed) ~ geno*bleach, alphadiv)) # results disagree with </code></pre>
 <pre><code>##             Df Sum Sq Mean Sq F value   Pr(&gt;F)    
 ## geno        15  113.3     7.6   3.569  0.00134 ** 
 ## bleach       1  325.7   325.7 153.874 1.48e-13 ***
@@ -1063,7 +632,12 @@ summary(aov(sqrt(observed) ~ geno*bleach, alphadiv)) # results disagree with the
 ## Residuals   31   65.6     2.1                     
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
-<pre class="r"><code>TukeyHSD(aov(sqrt(observed) ~ geno, alphadiv)) # this gets wonky because too many comparisons</code></pre>
+<pre class="r"><code>summary(aov(sqrt(observed) ~ type, alphadiv))</code></pre>
+<pre><code>##             Df Sum Sq Mean Sq F value Pr(&gt;F)
+## type         1    3.5   3.476   0.383  0.539
+## Residuals   60  544.9   9.082</code></pre>
+<pre class="r"><code>#the kruskal wallis test
+TukeyHSD(aov(sqrt(observed) ~ geno, alphadiv)) # this gets wonky because too many comparisons</code></pre>
 <pre><code>##   Tukey multiple comparisons of means
 ##     95% family-wise confidence level
 ## 
