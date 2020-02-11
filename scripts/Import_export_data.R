@@ -72,7 +72,7 @@ ps <- merge_phyloseq(ps, tree)
 # export .tsv asv_table to import into qiime2
 otu<-t(as(otu_table(ps),"matrix"))
 otu_biom<-make_biom(data=otu)
-write_biom(otu_biom,"./qiime/ps_table2.biom")
+write_biom(otu_biom,"./qiime/ps_table_rar.biom")
 
 # export taxonomy to import into qiime2
 tax<-as(tax_table(ps),"matrix")

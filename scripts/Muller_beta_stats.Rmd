@@ -74,6 +74,19 @@ pairwise.adonis.dm <- function(x,factors,stratum=NULL,p.adjust.m="bonferroni",pe
 load(file = "../data/ps_rar8692.RData")
 ps
 sample_sums(ps)
+
+
+# analyses to remove Rickettsiales form unrarefied data
+load(file = "../data/ps.RData")
+ps
+sample_sums(ps)
+
+ps <- subset_taxa(ps, Genus != "MD3-55")
+ps
+sample_sums(ps)
+set.seed(999)
+min_lib <- min(sample_sums(ps)) 
+ps <- rarefy_even_depth(ps, sample.size = min_lib, verbose = FALSE, replace = TRUE)
 ```
 
 ## Analysis
@@ -97,10 +110,15 @@ sampledf <- data.frame(sample_data(ps))
 ```{r}
 # Adonis individual tests
 adonis(ps_bc ~ bleach*geno, data = sampledf)
+adonis(ps_bj ~ bleach*geno, data = sampledf)
+adonis(ps_wu ~ bleach*geno, data = sampledf)
+adonis(ps_un ~ bleach*geno, data = sampledf)
+
 adonis(ps_bc ~ bleach*type, data = sampledf)
-adonis(ps_bj ~ type*geno*bleach, data = sampledf)
-adonis(ps_wu ~ type*geno*bleach, data = sampledf)
-adonis(ps_un ~ type*geno*bleach, data = sampledf)
+adonis(ps_bj ~ bleach*type, data = sampledf)
+adonis(ps_wu ~ bleach*type, data = sampledf)
+adonis(ps_un ~ bleach*type, data = sampledf)
+
 # all significant
 ## pairwise tests are all not significant (padj) probably too many comparisons
 ## maybe I should use the unadjusted pval?
@@ -162,16 +180,46 @@ nmds_bc <- metaMDSiter(ps_bc, k=2, trymax = 1000, maxit = 1000, autotransform=FA
 #nmds_wu <- metaMDSiter(ps_wu, k=2, trymax = 1000, maxit = 1000, autotransform=FALSE)
 #save(nmds_bc, file = "../data/nmds_bc.RData")
 
+# had to add this for plotting
+sample_data(ps)$geno.num = factor(get_variable(ps, "geno.num"))
 
-
-
-a <- plot_ordination(ps, nmds_bc, color = "geno.num", shape = "bleach") + 
+a <- plot_ordination(ps, nmds_bc, color = "type", shape = "bleach") + 
   geom_point(size = 2) + 
   theme_classic() +
   theme(legend.position = "left") +
-  labs(color = "Genotype") +
-  scale_colour_manual(values = myCol)
+  labs(color = "Resistance") +
+  scale_colour_manual(values = myCol) 
+#  stat_ellipse(geom = "polygon",type = "euclid")
+a
+# a <- plot_ordination(ps, nmds_bc, color = "geno.num", shape = "bleach") + 
+#   geom_point(size = 2) + 
+#   theme_classic() +
+#   theme(legend.position = "left") +
+#   labs(color = "Genotype") +
+#   scale_colour_manual(values = myCol)
+# a
 #a + stat_ellipse(type = "norm", mapping = aes(fill = bleach))
+```
+
+### Differences in Resistant genotypes
+```{r}
+ps_res <- subset_samples(ps, type == "resistant")
+sampledf_res <- data.frame(sample_data(ps_res))
+
+ps_res_wu <- phyloseq::distance(ps_res, method = "wunifrac")
+ps_res_un <- phyloseq::distance(ps_res, method = "unifrac")
+ps_res_bc <- phyloseq::distance(ps_res, method = "bray")
+ps_res_bj <- distance(ps_res, method = "jaccard", binary =TRUE)
+
+adonis(ps_res_bc ~ bleach, data = sampledf_res)
+adonis(ps_res_bj ~ bleach, data = sampledf_res)
+adonis(ps_res_wu ~ bleach, data = sampledf_res)
+adonis(ps_res_un ~ bleach, data = sampledf_res)
+
+anova(betadisper(ps_res_bc, sampledf_res$bleach, bias.adjust = TRUE))
+anova(betadisper(ps_res_bj, sampledf_res$bleach, bias.adjust = TRUE))
+anova(betadisper(ps_res_wu, sampledf_res$bleach, bias.adjust = TRUE))
+anova(betadisper(ps_res_un, sampledf_res$bleach, bias.adjust = TRUE))
 ```
 
 ## Analysis of log transformed data
@@ -201,10 +249,15 @@ psdf <- as.data.frame(otu_table(ps))
 ```{r}
 # Adonis individual tests
 adonis(ps_bc ~ bleach*geno, data = sampledf)
+adonis(ps_bj ~ bleach*geno, data = sampledf)
+adonis(ps_wu ~ bleach*geno, data = sampledf)
+adonis(ps_un ~ bleach*geno, data = sampledf)
+
 adonis(ps_bc ~ bleach*type, data = sampledf)
-adonis(ps_bj ~ type*geno*bleach, data = sampledf)
-adonis(ps_wu ~ type*geno*bleach, data = sampledf)
-adonis(ps_un ~ type*geno*bleach, data = sampledf)
+adonis(ps_bj ~ bleach*type, data = sampledf)
+adonis(ps_wu ~ bleach*type, data = sampledf)
+adonis(ps_un ~ bleach*type, data = sampledf)
+
 # all significant
 ## pairwise tests are all not significant (padj) probably too many comparisons
 ## maybe I should use the unadjusted pval?
@@ -262,9 +315,10 @@ nmds_bc <- metaMDSiter(ps_bc, k=2, trymax = 1000, maxit = 1000, autotransform=FA
 
 
 
-a <- plot_ordination(ps, nmds_bc, color = "geno.num", shape = "bleach") + 
+b <- plot_ordination(ps, nmds_bc, color = "geno.num", shape = "bleach") + 
   geom_point(size = 2) + 
   theme_classic() +
   theme(legend.position = "left") +
   labs(color = "Genotype") +
   scale_colour_manual(values = myCol)
+b

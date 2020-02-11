@@ -91,8 +91,19 @@ For all alpha and beta diversity statistics, I will be using the rarefied sOTU t
 ```{r load}
 setwd("/Users/Becca/Box Sync/Muller Bleaching and Rickettsiales/Muller-Acropora/")
 getwd()
-load("./data/ps_rar8692.RData")
+#load("./data/ps_rar8692.RData")
+#ps
+
+# analyses to remove Rickettsiales form unrarefied data
+load(file = "./data/ps.RData")
 ps
+sample_sums(ps)
+
+ps <- subset_taxa(ps, Genus != "MD3-55")
+sample_sums(ps)
+
+min_lib <- min(sample_sums(ps)) 
+ps <- rarefy_even_depth(ps, sample.size = min_lib, verbose = FALSE, replace = TRUE)
 ```
 
 ### Calculating alpha diversity statistics
@@ -126,7 +137,7 @@ observed[ ,] <- obs
 colnames(observed) [1] <- "observed"
 
 # Calculate chao1
-hao <- as.numeric(as.matrix(subset(estimate_richness(ps, measures = "Chao1"), select = c(1))))
+chao <- as.numeric(as.matrix(subset(estimate_richness(ps, measures = "Chao1"), select = c(1))))
 chao1[ ,] <- chao
 colnames(chao1) [1] <- "chao1"
 
@@ -160,5 +171,5 @@ alphadiv <- cbind(alpha, s)
 head(alphadiv)
 alphadiv <- alphadiv[,-6]
 head(alphadiv)
-#write.csv(alphadiv, file = "../data/alphadiv8692.csv")
+write.csv(alphadiv, file = "../data/alphadiv_norick_rar.csv")
 ```

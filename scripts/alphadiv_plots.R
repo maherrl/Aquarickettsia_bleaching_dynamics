@@ -6,6 +6,7 @@ library("ggthemes")
 
 
 alphadiv <- read.csv("./data/alphadiv8692.csv")
+alphadiv <- read.csv("./data/alphadiv_norick_rar.csv")
 head(alphadiv)
 alphadiv$geno.num <- as.factor(alphadiv$geno.num)
 
@@ -35,14 +36,16 @@ myCol <- c('#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#4
           '#000075', '#808080', '#000000')
 breakss <- c("Aug","Sep")
 labelss <- c("Pre Bleach", "Bleached")
+myCol <- c("#E69F00","#56B4E9")
 
 # alpha diversity boxplot
-A <- ggplot(alphadiv, aes(x=bleach, y=faithPD)) +
+A <- ggplot(alphadiv, aes(x=type, y=shannon)) +
+  facet_wrap(~bleach)+
   geom_boxplot(outlier.shape = NA, color = "gray35") +
-  geom_point(aes(color = geno.num), 
+  geom_point(aes(color = type), 
              position = position_jitter(width = .25, height = 0)) +
   scale_x_discrete(breaks=breakss, labels=labelss) +
-  ylab("Faith's phylogenetic diversity") +
+  ylab("Shannon's diversity index") +
   theme_bw() +
   theme(axis.title.x = element_blank(),
         axis.text.x = element_text(size = 10)) +

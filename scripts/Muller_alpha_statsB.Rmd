@@ -64,6 +64,7 @@ normality.plots <- function(x) {
 Load the alphadiv.csv files created in the RAPID_alpha_statsA.Rmd script. First starting with all species
 ```{r load}
 alphadiv <- read.csv("../data/alphadiv8692.csv")
+alphadiv <- read.csv("../data/alphadiv_norick_rar.csv")
 head(alphadiv)
 ```
 
@@ -125,7 +126,14 @@ kruskal.test(faithPD ~ geno, data = alphadiv)
 kruskal.test(faithPD ~ type, data = alphadiv)
 #pairwise.wilcox.test(alphadiv$faithPD, alphadiv$bleach.geno, p.adjust.method = 'fdr')
 ```
-
+### Tests for differences within resistant genotypes
+```{r}
+alphadiv_res <- subset(alphadiv, alphadiv$type == "resistant")
+kruskal.test(observed ~ bleach, data = alphadiv_res)
+kruskal.test(simpson ~ bleach, data = alphadiv_res)
+kruskal.test(shannon ~ bleach, data = alphadiv_res)
+kruskal.test(faithPD ~ bleach, data = alphadiv_res)
+```
 
 ### 4 Parametric tests for significance
 Looking for normality and homogeneity of group dispersions
