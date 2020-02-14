@@ -76,3 +76,6 @@ silva_sp <- addSpecies(tax_silva, "~/Bleaching_Rickettsiales/silva_species_assig
 ps_object <- phyloseq(otu_table(seqtab_trimmed_clean, taxa_are_rows=FALSE), tax_table(tax_silva))
 ps_object_sp <- phyloseq(otu_table(seqtab_trimmed_clean, taxa_are_rows=FALSE), tax_table(silva_sp))
 
+# Save as RDS objects
+saveRDS(ps_object, file = "~/ps_object.rds")
+saveRDS(ps_object_sp, file = "~/ps_object_sp.rds")
