@@ -51,10 +51,12 @@ for(sam in sample.names) {
 }
 
 st.all <- makeSequenceTable(mergers) #normal to get warning message saying the sequences being tabled vary in length
-seqtab <- removeBimeraDenovo(st.all, method="consensus", multithread=TRUE)
-saveRDS(seqtab, "~/Bleaching_Rickettsiales/seqtab.rds")
+seqtab_trimmed <- st.all[,nchar(colnames(seqtab_strict)) %in% seq(290,295)]
+table(nchar(getSequences(seqtab_trimmed)))
+seqtab_trimmed_clean <- removeBimeraDenovo(seqtab_trimmed, method="consensus", multithread=TRUE)
+saveRDS(seqtab_trimmed_clean, "~/Bleaching_Rickettsiales/seqtab_trimmed_clean.rds")
 
-tax_silva <- assignTaxonomy(seqtab, "~/Bleaching_Rickettsiales/silva_nr_v132_train_set.fa.gz", multithread=TRUE)
+tax_silva <- assignTaxonomy(seqtab_trimmed_clean, "~/Bleaching_Rickettsiales/silva_nr_v132_train_set.fa.gz", multithread=TRUE)
 silva_sp <- addSpecies(tax_silva, "~/Bleaching_Rickettsiales/silva_species_assignment_v132.fa.gz")
 ps_object <- phyloseq(otu_table(seqtab, taxa_are_rows=FALSE), 
                tax_table(tax_silva))
