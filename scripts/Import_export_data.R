@@ -3,6 +3,8 @@
 ## and add metadata. Also includes exploratory data.
 #################################################################
 
+rm(list=ls())
+
 library("dada2")
 library("seqinr")
 library("biomformat")
@@ -53,9 +55,9 @@ fast_melt = function(physeq){
 }
 
 # phyloseq object output from Dada2
-ps <- readRDS("./data/ps_object_sp_strict.rds")
+ps <- readRDS("./data/ps_object_sp_new.rds")
 # sequences object made from Dada2
-seqtab <- readRDS("./data/seqtab_strict.rds")
+# seqtab <- readRDS("./data/seqtab_strict.rds") #old strict ps object
 
 # exporting sequences to a fasta file for import into qiime
 uniqueSeqs <- as.list(colnames(seqtab))
@@ -72,7 +74,7 @@ ps <- merge_phyloseq(ps, tree)
 # export .tsv asv_table to import into qiime2
 otu<-t(as(otu_table(ps),"matrix"))
 otu_biom<-make_biom(data=otu)
-write_biom(otu_biom,"./qiime/ps_table_rar.biom")
+write_biom(otu_biom,"./qiime/ps.biom")
 
 # export taxonomy to import into qiime2
 tax<-as(tax_table(ps),"matrix")
@@ -103,7 +105,7 @@ pst = fast_melt(ps)
 prevdt = pst[, list(Prevalence = sum(count > 0), 
                     TotalCounts = sum(count)),
              by = taxaID]
-keepTaxa = prevdt[(Prevalence >=0 & TotalCounts >28), taxaID]
+keepTaxa = prevdt[(Prevalence >=0 & TotalCounts >29), taxaID]
 ps = prune_taxa(keepTaxa,ps)
 ps
 sample_sums(ps)
@@ -159,10 +161,13 @@ length(explore.df$Sample_Sums)
 
 # plot alpha diversity
 plot_richness(ps, measures = c('Shannon', 'Simpson'))
+
+#################################################################################
 # rarefy
-#set.seed(400)
-ps <- rarefy_even_depth(ps, sample.size = 8692, rngseed = 999) 
+num <- min(sample_sums(ps))
+ps <- rarefy_even_depth(ps, sample.size = 8663, rngseed = 999) 
 ps
+sum(sample_sums(ps))
 sample_sums(ps)
 # plot alpha diversity
 richness.rare <- cbind(estimate_richness(ps_rar, 
@@ -186,4 +191,4 @@ ggplot(data = richness.rare, aes(x = Shannon, y = (Simpson-1)*-1, color = Bleach
   theme_cowplot()
 
 # save ps object
-save(ps, file = "./data/ps_rar8692.RData")
+save(ps, file = "./data/ps_rar8663.RData")

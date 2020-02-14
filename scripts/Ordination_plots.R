@@ -1,4 +1,6 @@
 ## Plotting ordination
+library("vegan")
+
 # functions
 ordicenter <- function (ord, groups, display = "sites", w = weights(ord, display), 
                         show.groups, ...) 
@@ -39,7 +41,7 @@ ordicenter <- function (ord, groups, display = "sites", w = weights(ord, display
   invisible()
 }
 
-load(file = "../data/ps_rar8692.RData")
+load(file = "./data/ps_rar8692.RData")
 ps
 sample_sums(ps)
 ps_bc <- phyloseq::distance(ps, method = "bray")
@@ -65,31 +67,35 @@ Sep.res <- rownames(meta[which(meta[,2] == "Sep" & meta[,7] =="resistant"),])
 Sep.sus <- rownames(meta[which(meta[,2] == "Sep" & meta[,7] =="susceptible"),])
 
 
-
-Aug.df <- table[,Aug]
-nitrate.df <- table[,nitrate]
-ammon.df <- table[,ammon]
-
-test.df <- cbind(control.df, nitrate.df, ammon.df)
-classes <- c(rep("Aug", length(Aug)), rep("Sep", length(Sep)))
-groups <- classes
-classes <- c(rep("Aug.res", length(Aug.res)), rep("Aug.sus", length(Aug.sus)),
-             rep("Sep.res", length(Sep.res)), rep("Sep.sus", length(Sep.sus)))
-df <- test.df
 dims <- c(1,2)
 ellp.kind <- "ehull"
 
 # For Weighted Unifra
-ps_bc <- phyloseq::distance(ps, method = "wunifrac")
-object <- metaMDS(ps_bc, k=2, binary = FALSE)
-groups_bc <- meta$nutrient
+object <- metaMDSiter(ps_bc, k=2, trymax = 1000, maxit = 1000, autotransform=FALSE)
+meta$bleach.type <- paste(meta$bleach, meta$type, sep = "_")
+bleach.type <- meta$bleach.type
 
-mds.fig <- ordiplot(nmds_bc, display = "sites", type = "none", choices = dims, xlim = c(-1,1))
-ordispider(nmds_bc, groups, col = "gray")
+mds.fig <- ordiplot(object, xlim = c(-1, 1), display = "sites", type = "none", choices = dims)
+#ordispider(object, groups, col = "gray")
 points(mds.fig, "sites", pch = 19, col = "#E69F00", select = Aug.res)
 points(mds.fig, "sites", pch = 19, col = "#56B4E9", select = Aug.sus)
 points(mds.fig, "sites", pch = 17, col = "#E69F00", select = Sep.res)
 points(mds.fig, "sites", pch = 17, col = "#56B4E9", select = Sep.sus)
-ordiellipse(nmds_bc, groups, conf = 0.95, label = FALSE, choices = dims, kind = ellp.kind, col = "gray", lwd = 2, show.groups = "Aug")
+ordiellipse(object, bleach.type, conf = 0.95, label = FALSE, choices = dims, kind = ellp.kind, col = "#E69F00", lwd = 2, show.groups = "Sep_resistant")
+ordiellipse(object, bleach.type, conf = 0.95, label = FALSE, choices = dims, kind = ellp.kind, col = "#E69F00", lwd = 2, show.groups = "Aug_resistant")
+ordiellipse(object, bleach.type, conf = 0.95, label = FALSE, choices = dims, kind = ellp.kind, col = "#56B4E9", lwd = 2, show.groups = "Sep_susceptible")
+ordiellipse(object, bleach.type, conf = 0.95, label = FALSE, choices = dims, kind = ellp.kind, col = "#56B4E9", lwd = 2, show.groups = "Aug_susceptible")
+
+ordiellipse(object, groups, conf = 0.95, label = FALSE, choices = dims, kind = ellp.kind, col = "gray", lwd = 2, show.groups = "Aug")
 ordiellipse(nmds_bc, groups, conf = 0.95, label = FALSE, choices = dims, kind = ellp.kind, col = "gray", lwd = 2, show.groups = "Sep")
 ordicenter(nmds_bc, groups, pch = 4, col = "red", label = FALSE)
+
+
+load(file = "./data/ps_rar8692.RData")
+
+# extract distance to centroid
+sampledf <- data.frame(sample_data(ps))
+disp <- betadisper(ps_bc, sampledf$bleach, bias.adjust = TRUE)
+dispd <- as.data.frame(disp$distances)
+dispd <- cbind(dispd, sample_data(ps))
+colnames(dispd)[1] <- "distance"

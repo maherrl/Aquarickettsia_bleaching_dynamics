@@ -3,6 +3,7 @@
 rm(list=ls())
 library("ggplot2")
 library("ggthemes")
+library("cowplot")
 
 
 alphadiv <- read.csv("./data/alphadiv8692.csv")
@@ -48,10 +49,13 @@ A <- ggplot(alphadiv, aes(x=type, y=shannon)) +
   ylab("Shannon's diversity index") +
   theme_bw() +
   theme(axis.title.x = element_blank(),
-        axis.text.x = element_text(size = 10)) +
-  scale_colour_manual(values = myCol)
+        axis.text.x = element_text(size = 10),
+        legend.position = "none") +
+  scale_colour_manual(values = myCol) +
+  ylim(2,5.5)
 A
 ggsave(A, "./plots/observed_.pdf")
+plot_grid(A,B)
 
 D <- ggplot(alphadiv, aes(x=bleach, y=faithPD)) +
   geom_boxplot(outlier.shape = NA, color = "gray35") +
