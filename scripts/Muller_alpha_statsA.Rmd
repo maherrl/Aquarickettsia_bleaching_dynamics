@@ -89,21 +89,10 @@ data_summary <- function(data, varname, groupnames){
 #### Load the data
 For all alpha and beta diversity statistics, I will be using the rarefied sOTU table. The table has been rarefied to 1778 sequences per sample.
 ```{r load}
-setwd("/Users/Becca/Box Sync/Muller Bleaching and Rickettsiales/Muller-Acropora/")
-getwd()
-#load("./data/ps_rar8692.RData")
-#ps
-
 # analyses to remove Rickettsiales form unrarefied data
-load(file = "./data/ps.RData")
+load(file = "./data/ps_rar8663.RData")
 ps
 sample_sums(ps)
-
-ps <- subset_taxa(ps, Genus != "MD3-55")
-sample_sums(ps)
-
-min_lib <- min(sample_sums(ps)) 
-ps <- rarefy_even_depth(ps, sample.size = min_lib, verbose = FALSE, replace = TRUE)
 ```
 
 ### Calculating alpha diversity statistics
@@ -171,5 +160,5 @@ alphadiv <- cbind(alpha, s)
 head(alphadiv)
 alphadiv <- alphadiv[,-6]
 head(alphadiv)
-write.csv(alphadiv, file = "../data/alphadiv_norick_rar.csv")
+write.csv(alphadiv, file = "../data/alphadiv_8663.csv")
 ```
