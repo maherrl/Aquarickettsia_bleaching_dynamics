@@ -79,7 +79,7 @@ p
 
 
 
-# Figure 2 - Taxa plot
+# Figure 3 - Taxa plot
 #######################################################
 # load the rarefied data table with all species
 load(file = "./data/ps_rar8663.RData")
@@ -109,10 +109,8 @@ ps_rel_genus_melt$genus[ps_rel_genus_melt$genus != "MD3-55" &
                           ps_rel_genus_melt$genus != "Alteromonas" &
                           ps_rel_genus_melt$genus != "Aestuariibacter"] <- NA
 
-levels(ps_rel_genus_melt$bleach) <- c("Pre-Bleach", "Bleached")
+levels(ps_rel_genus_melt$bleach) <- c("Apparently Healthy", "Bleached")
 levels(ps_rel_genus_melt$type) <- c("Resistant","Susceptible")
-levels(ps_rel_genus_melt$genus) <- c("Pseudoalteromonas","Acinetobacter","Staphylococcus","Aestuariibacter",
-                                     "Cloacibacterium","Corynebacterium","Vibrio","Alteromonas","MD3-55")
 # plot
 bar_species = ggplot(ps_rel_genus_melt, aes(x = reorder(geno, geno.num), y=Abundance)) + 
   geom_bar(stat="identity", position="fill", aes(fill = reorder(genus, Abundance))) +
@@ -131,7 +129,7 @@ bar_species = ggplot(ps_rel_genus_melt, aes(x = reorder(geno, geno.num), y=Abund
 bar_species
 
 
-# Figure 3 - Alpha div
+# Figure 4 - Alpha div
 #######################################################
 rm(list=ls())
 library("ggplot2")
@@ -146,12 +144,13 @@ colnames(alphadiv2) <- c("X","observeda", "chao1a","simpsona","shannona")
 alphadiv <- cbind(alphadiv, alphadiv2)
 alphadiv <- alphadiv[,-17]
 head(alphadiv)
+alphadiv <- alphadiv[which(alphadiv$geno.num != 20),]
 
 
-levels(alphadiv$bleach) <- c("Pre-Bleach", "Bleached")
+levels(alphadiv$bleach) <- c("Apparently Healthy", "Bleached")
 levels(alphadiv$type) <- c("Resistant","Susceptible")
 
-myCol <- c("#E69F00","#56B4E9")
+myCol <- c("#0072B2", "#CC3300")
 
 # alpha diversity boxplot
 A <- ggplot(alphadiv, aes(x=type, y=simpson)) +
@@ -159,15 +158,16 @@ A <- ggplot(alphadiv, aes(x=type, y=simpson)) +
   geom_boxplot(outlier.shape = NA, color = "gray35") +
   geom_point(aes(color = type), 
              position = position_jitter(width = .25, height = 0)) +
-  scale_x_discrete(breaks=breakss, labels=labelss) +
   ylab("Simpson's diversity index") +
   theme_bw() +
   theme(axis.title.x = element_blank(),
-        axis.text.x = element_text(size = 10),
-        legend.position = c(0.8,0.2),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        legend.position = c(0.75,0.2),
         legend.title = element_blank()) +
   scale_colour_manual(values = myCol) +
-  ylim(0.85,1) +
+  stat_summary(geom = 'text', label = c("a","b","a","a"), fun.y = max, vjust = -1, size = 3) +
+  ylim(0.855,1) +
   ggtitle("With Aquarickettsia")
 A
 B <- ggplot(alphadiv, aes(x=type, y=simpsona)) +
@@ -175,32 +175,32 @@ B <- ggplot(alphadiv, aes(x=type, y=simpsona)) +
   geom_boxplot(outlier.shape = NA, color = "gray35") +
   geom_point(aes(color = type), 
              position = position_jitter(width = .25, height = 0)) +
-  scale_x_discrete(breaks=breakss, labels=labelss) +
   ylab("Simpson's diversity index") +
   theme_bw() +
   theme(axis.title.x = element_blank(),
-        axis.text.x = element_text(size = 10),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
         legend.position = "none") +
   scale_colour_manual(values = myCol) +
-  ylim(0.85,1) +
+  stat_summary(geom = 'text', label = c("ab","b","a","a"), fun.y = max, vjust = -1, size = 3) +
+  ylim(0.855,1) +
   ggtitle("Without Aquarickettsia")
 B
-
-plot_grid(A,B, labels = c("A","B"))
 
 C <- ggplot(alphadiv, aes(x=type, y=chao1)) +
   facet_wrap(~bleach)+
   geom_boxplot(outlier.shape = NA, color = "gray35") +
   geom_point(aes(color = type), 
              position = position_jitter(width = .25, height = 0)) +
-  scale_x_discrete(breaks=breakss, labels=labelss) +
   ylab("Chao1 index") +
   theme_bw() +
   theme(axis.title.x = element_blank(),
-        axis.text.x = element_text(size = 10),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
         legend.position = "none") +
   scale_colour_manual(values = myCol) +
-  ylim(25,200) +
+  stat_summary(geom = 'text', label = c("a","a","b","b"), fun.y = max, vjust = -1, size = 3) +
+  ylim(0,300) +
   ggtitle("With Aquarickettsia")
 C
 D <- ggplot(alphadiv, aes(x=type, y=chao1a)) +
@@ -208,15 +208,136 @@ D <- ggplot(alphadiv, aes(x=type, y=chao1a)) +
   geom_boxplot(outlier.shape = NA, color = "gray35") +
   geom_point(aes(color = type), 
              position = position_jitter(width = .25, height = 0)) +
-  scale_x_discrete(breaks=breakss, labels=labelss) +
   ylab("Chao1 index") +
   theme_bw() +
   theme(axis.title.x = element_blank(),
-        axis.text.x = element_text(size = 10),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
         legend.position = "none") +
   scale_colour_manual(values = myCol) +
-  ylim(25,200) +
+  stat_summary(geom = 'text', label = c("a","b","ac","c"), fun.y = max, vjust = -1, size = 3) +
+  ylim(0,300) +
   ggtitle("Without Aquarickettsia")
 D
 
 plot_grid(A,B,C,D, nrow = 2, labels = c("A","B","C","D"))
+
+# Figure 5 - Beta div
+#######################################################
+library("vegan")
+load(file = "./data/ps_rar8663.RData")
+ps_bc <- phyloseq::distance(ps, method = "bray")
+myCol <- c("#0072B2", "#CC3300")
+
+# Prepare data for plotting
+meta <- as.data.frame(sample_data(ps))
+table <- as.data.frame(otu_table(ps))
+head(meta)
+
+Aug <- rownames(meta[which(meta[,2] == "Aug"),])
+Sep <- rownames(meta[which(meta[,2] == "Sep"),])
+Aug.res <- rownames(meta[which(meta[,2] == "Aug" & meta[,7] =="resistant"),])
+Aug.sus <- rownames(meta[which(meta[,2] == "Aug" & meta[,7] =="susceptible"),])
+Sep.res <- rownames(meta[which(meta[,2] == "Sep" & meta[,7] =="resistant"),])
+Sep.sus <- rownames(meta[which(meta[,2] == "Sep" & meta[,7] =="susceptible"),])
+bleach.type <- meta$bleach.type
+
+# params for plotting
+dims <- c(1,2)
+ellp.kind <- "ehull"
+
+# ordinate with Bray Curtis
+object <- metaMDSiter(ps_bc, k=2, trymax = 10000, maxit = 10000, autotransform=FALSE)
+save(object, file = "./data/ord_bc_wR.RData")
+
+mds.fig <- ordiplot(object, xlim = c(-1.5, 1.5), display = "sites", type = "none", choices = dims)
+#ordispider(object, groups, col = "gray")
+points(mds.fig, "sites", pch = 19, col = "#0072B2", select = Aug.res)
+points(mds.fig, "sites", pch = 19, col = "#CC3300", select = Aug.sus)
+points(mds.fig, "sites", pch = 17, col = "#0072B2", select = Sep.res)
+points(mds.fig, "sites", pch = 17, col = "#CC3300", select = Sep.sus)
+ordiellipse(object, bleach.type, conf = 0.95, label = FALSE, choices = dims, kind = ellp.kind, col = "#0072B2", lwd = 2, show.groups = "Sepresistant")
+ordiellipse(object, bleach.type, conf = 0.95, label = FALSE, choices = dims, kind = ellp.kind, col = "#0072B2", lwd = 2, show.groups = "Augresistant")
+ordiellipse(object, bleach.type, conf = 0.95, label = FALSE, choices = dims, kind = ellp.kind, col = "#CC3300", lwd = 2, show.groups = "Sepsusceptible")
+ordiellipse(object, bleach.type, conf = 0.95, label = FALSE, choices = dims, kind = ellp.kind, col = "#CC3300", lwd = 2, show.groups = "Augsusceptible")
+legend("bottomleft", legend = c("Resistant","Susceptible"), pch = 19, col = c("#0072B2","#CC3300"))
+legend("topleft", legend = c("Apparently\nHealthy","Bleached"), pch = c(19,17))
+text(1.3,1.5, labels = c("stress=0.132"))
+
+
+# extract distance to centroid
+sampledf <- data.frame(sample_data(ps))
+disp <- betadisper(ps_bc, sampledf$bleach.type, bias.adjust = TRUE)
+dispd <- as.data.frame(disp$distances)
+dispd <- cbind(dispd, sample_data(ps))
+colnames(dispd)[1] <- "distance"
+
+levels(dispd$bleach) <- c("Apparently Healthy", "Bleached")
+levels(dispd$type) <- c("Resistant","Susceptible")
+
+a <- ggplot(dispd, aes(x=type, y=distance)) +
+  facet_wrap(~bleach)+
+  geom_boxplot(outlier.shape = NA, color = "gray35") +
+  geom_point(aes(color = type), 
+             position = position_jitter(width = .25, height = 0)) +
+  ylab("Distance-to-centroid") +
+  theme_bw() +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        legend.position = "none") +
+  scale_colour_manual(values = myCol) +
+  stat_summary(geom = 'text', label = c("a","b","a","a"), fun.y = max, vjust = -1, size = 3) +
+  ggtitle("With Aquarickettsia") +
+  scale_y_continuous(expand = expand_scale(mult = c(.1)))
+a
+
+# without Aquarickettsia
+load(file = "./data/ps_rar823.RData")
+ps_bc <- phyloseq::distance(ps, method = "bray")
+
+object2 <- metaMDSiter(ps_bc, k=2, trymax = 10000, maxit = 10000, autotransform=FALSE)
+save(object2, file = "./data/ord_bc_woR.RData")
+
+mds.fig <- ordiplot(object2, xlim = c(-1.5, 1.5), display = "sites", type = "none", choices = dims)
+#ordispider(object, groups, col = "gray")
+points(mds.fig, "sites", pch = 19, col = "#0072B2", select = Aug.res)
+points(mds.fig, "sites", pch = 19, col = "#CC3300", select = Aug.sus)
+points(mds.fig, "sites", pch = 17, col = "#0072B2", select = Sep.res)
+points(mds.fig, "sites", pch = 17, col = "#CC3300", select = Sep.sus)
+ordiellipse(object2, bleach.type, conf = 0.95, label = FALSE, choices = dims, kind = ellp.kind, col = "#0072B2", lwd = 2, show.groups = "Sepresistant")
+ordiellipse(object2, bleach.type, conf = 0.95, label = FALSE, choices = dims, kind = ellp.kind, col = "#0072B2", lwd = 2, show.groups = "Augresistant")
+ordiellipse(object2, bleach.type, conf = 0.95, label = FALSE, choices = dims, kind = ellp.kind, col = "#CC3300", lwd = 2, show.groups = "Sepsusceptible")
+ordiellipse(object2, bleach.type, conf = 0.95, label = FALSE, choices = dims, kind = ellp.kind, col = "#CC3300", lwd = 2, show.groups = "Augsusceptible")
+legend("topleft", legend = c("Resistant","Susceptible"), pch = 19, col = c("#0072B2","#CC3300"))
+legend("bottomleft", legend = c("Apparently Healthy","Bleached"), pch = c(19,17))
+text(1.5,1.8, labels = c("stress=0.212"))
+
+
+# extract distance to centroid
+disp <- betadisper(ps_bc, sampledf$bleach.type, bias.adjust = TRUE)
+dispd <- as.data.frame(disp$distances)
+dispd <- cbind(dispd, sample_data(ps))
+colnames(dispd)[1] <- "distance"
+
+levels(dispd$bleach) <- c("Apparently Healthy", "Bleached")
+levels(dispd$type) <- c("Resistant","Susceptible")
+
+b <- ggplot(dispd, aes(x=type, y=distance)) +
+  facet_wrap(~bleach)+
+  geom_boxplot(outlier.shape = NA, color = "gray35") +
+  geom_point(aes(color = type), 
+             position = position_jitter(width = .25, height = 0)) +
+  ylab("Distance-to-centroid") +
+  theme_bw() +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        legend.position = "none") +
+  scale_colour_manual(values = myCol) +
+  stat_summary(geom = 'text', label = c("ab","a","ab","b"), fun.y = max, vjust = -1, size = 3) +
+  ggtitle("Without Aquarickettsia") +
+  scale_y_continuous(expand = expand_scale(mult = c(.1)))
+b
+
+plot_grid(a,b, labels = c("B","D"), nrow = 2)

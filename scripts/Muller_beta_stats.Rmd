@@ -17,9 +17,6 @@ library("usedist")
 library("ggplot2")
 library("microbiome")
 
-# set working directory-------------------
-#setwd("~/Box Sync/RAPID-analysis/")
-
 ## functions----------------------
 pairwise.adonis.dm <- function(x,factors,stratum=NULL,p.adjust.m="bonferroni",perm=999){
   
@@ -67,36 +64,17 @@ pairwise.adonis.dm <- function(x,factors,stratum=NULL,p.adjust.m="bonferroni",pe
   }
 ```
 
+## Analysis with Aquarickettsia
 ```{r}
-## Data Analysis----------------------------
-
 # First import data from bioinformatic processing
-load(file = "../data/ps_rar8692.RData")
+load(file = "../data/ps_rar8663.RData")
 ps
-sample_sums(ps)
-
-
-# analyses to remove Rickettsiales form unrarefied data
-load(file = "../data/ps.RData")
-ps
-sample_sums(ps)
-
-ps <- subset_taxa(ps, Genus != "MD3-55")
-ps
-sample_sums(ps)
-set.seed(999)
-min_lib <- min(sample_sums(ps)) 
-ps <- rarefy_even_depth(ps, sample.size = min_lib, verbose = FALSE, replace = TRUE)
+head(sample_sums(ps))
 ```
-
-## Analysis
-
 ### Calculate distance matrices
 
 ```{r}
 # Calculate all four distance matrices: weighted unifrac, unweighted unifrac, bray curtis, binary jaccard
-ps_wu <- phyloseq::distance(ps, method = "wunifrac")
-ps_un <- phyloseq::distance(ps, method = "unifrac")
 ps_bc <- phyloseq::distance(ps, method = "bray")
 ps_bj <- distance(ps, method = "jaccard", binary =TRUE)
 ```
@@ -105,27 +83,16 @@ ps_bj <- distance(ps, method = "jaccard", binary =TRUE)
 # PERMANOVA's with Adonis -  Permutational Multivariate Analasis of Variance
 # Make a data frame from the sample_data
 sampledf <- data.frame(sample_data(ps))
-```
-#### geno
-```{r}
-# Adonis individual tests
-adonis(ps_bc ~ bleach*geno, data = sampledf)
-adonis(ps_bj ~ bleach*geno, data = sampledf)
-adonis(ps_wu ~ bleach*geno, data = sampledf)
-adonis(ps_un ~ bleach*geno, data = sampledf)
 
+# Adonis individual tests
 adonis(ps_bc ~ bleach*type, data = sampledf)
 adonis(ps_bj ~ bleach*type, data = sampledf)
-adonis(ps_wu ~ bleach*type, data = sampledf)
-adonis(ps_un ~ bleach*type, data = sampledf)
 
 # all significant
 ## pairwise tests are all not significant (padj) probably too many comparisons
 ## maybe I should use the unadjusted pval?
-pairwise.adonis.dm(ps_bc, sample_data(ps)$geno, p.adjust.m = "fdr")
+pairwise.adonis.dm(ps_bc, sample_data(ps)$bleach.type, p.adjust.m = "fdr")
 #pairwise.adonis.dm(ps_bj, sample_data(ps)$geno, p.adjust.m = "fdr")
-#pairwise.adonis.dm(ps_wu, sample_data(ps)$geno, p.adjust.m = "fdr")
-#pairwise.adonis.dm(ps_un, sample_data(ps)$geno, p.adjust.m = "fdr")
 ```
 
 ### PERMDISPs
@@ -133,108 +100,39 @@ pairwise.adonis.dm(ps_bc, sample_data(ps)$geno, p.adjust.m = "fdr")
 ```{r}
 anova(betadisper(ps_bc, sampledf$bleach, bias.adjust = TRUE))
 anova(betadisper(ps_bj, sampledf$bleach, bias.adjust = TRUE))
-anova(betadisper(ps_wu, sampledf$bleach, bias.adjust = TRUE))
-anova(betadisper(ps_un, sampledf$bleach, bias.adjust = TRUE))
-# All non-significant
 ```
-#### genotype
-```{r}
-anova(betadisper(ps_bc, sampledf$geno, bias.adjust = TRUE))
-anova(betadisper(ps_bj, sampledf$geno, bias.adjust = TRUE))
-anova(betadisper(ps_wu, sampledf$geno, bias.adjust = TRUE))
-anova(betadisper(ps_un, sampledf$geno, bias.adjust = TRUE))
-```
+
 #### type
 ```{r}
 anova(betadisper(ps_bc, sampledf$type, bias.adjust = TRUE))
 anova(betadisper(ps_bj, sampledf$type, bias.adjust = TRUE))
-anova(betadisper(ps_wu, sampledf$type, bias.adjust = TRUE))
-anova(betadisper(ps_un, sampledf$type, bias.adjust = TRUE))
 ```
 #### Interaction
 ```{r}
-anova(betadisper(ps_bc, sampledf$bleach.geno, bias.adjust = TRUE))
-anova(betadisper(ps_bj, sampledf$bleach.geno, bias.adjust = TRUE))
-anova(betadisper(ps_un, sampledf$bleach.geno, bias.adjust = TRUE))
-anova(betadisper(ps_wu, sampledf$bleach.geno, bias.adjust = TRUE))
+anova(betadisper(ps_bc, sampledf$bleach.type, bias.adjust = TRUE))
+anova(betadisper(ps_bj, sampledf$bleach.type, bias.adjust = TRUE))
+
 # pairwise tests
-#p.adjust(permutest(betadisper(ps_un, sampledf$geno.trt, 
-#                              bias.adjust = TRUE), 
-#                   pairwise=TRUE)$pairwise$permuted, method = 'fdr')
+p.adjust(permutest(betadisper(ps_bc, sampledf$bleach.type, 
+                              bias.adjust = TRUE), 
+                   pairwise=TRUE)$pairwise$permuted, method = 'fdr')
 #p.adjust(permutest(betadisper(ps_wu, sampledf$geno.trt, 
 #                              bias.adjust = TRUE), 
 #                   pairwise=TRUE)$pairwise$permuted, method = 'fdr')
 
 ```
 
-Plotting
+## Analysis without Aquarickettsia
 ```{r}
-myCol <- c('#e6194b', '#3cb44b', '#ffe119', 
-           '#4363d8', '#f58231', '#911eb4', '#46f0f0', 
-           '#f032e6', '#bcf60c', '#008080',
-           '#9a6324', '#800000', '#808000', 
-          '#000075', '#808080', '#000000')
-
-
-nmds_bc <- metaMDSiter(ps_bc, k=2, trymax = 1000, maxit = 1000, autotransform=FALSE)
-#nmds_wu <- metaMDSiter(ps_wu, k=2, trymax = 1000, maxit = 1000, autotransform=FALSE)
-#save(nmds_bc, file = "../data/nmds_bc.RData")
-
-# had to add this for plotting
-sample_data(ps)$geno.num = factor(get_variable(ps, "geno.num"))
-
-a <- plot_ordination(ps, nmds_bc, color = "type", shape = "bleach") + 
-  geom_point(size = 2) + 
-  theme_classic() +
-  theme(legend.position = "left") +
-  labs(color = "Resistance") +
-  scale_colour_manual(values = myCol) 
-#  stat_ellipse(geom = "polygon",type = "euclid")
-a
-# a <- plot_ordination(ps, nmds_bc, color = "geno.num", shape = "bleach") + 
-#   geom_point(size = 2) + 
-#   theme_classic() +
-#   theme(legend.position = "left") +
-#   labs(color = "Genotype") +
-#   scale_colour_manual(values = myCol)
-# a
-#a + stat_ellipse(type = "norm", mapping = aes(fill = bleach))
+# First import data from bioinformatic processing
+load(file = "../data/ps_rar823.RData")
+ps
+head(sample_sums(ps))
 ```
-
-### Differences in Resistant genotypes
-```{r}
-ps_res <- subset_samples(ps, type == "resistant")
-sampledf_res <- data.frame(sample_data(ps_res))
-
-ps_res_wu <- phyloseq::distance(ps_res, method = "wunifrac")
-ps_res_un <- phyloseq::distance(ps_res, method = "unifrac")
-ps_res_bc <- phyloseq::distance(ps_res, method = "bray")
-ps_res_bj <- distance(ps_res, method = "jaccard", binary =TRUE)
-
-adonis(ps_res_bc ~ bleach, data = sampledf_res)
-adonis(ps_res_bj ~ bleach, data = sampledf_res)
-adonis(ps_res_wu ~ bleach, data = sampledf_res)
-adonis(ps_res_un ~ bleach, data = sampledf_res)
-
-anova(betadisper(ps_res_bc, sampledf_res$bleach, bias.adjust = TRUE))
-anova(betadisper(ps_res_bj, sampledf_res$bleach, bias.adjust = TRUE))
-anova(betadisper(ps_res_wu, sampledf_res$bleach, bias.adjust = TRUE))
-anova(betadisper(ps_res_un, sampledf_res$bleach, bias.adjust = TRUE))
-```
-
-## Analysis of log transformed data
-Optional transformations to the data
-```{r}
-# Log-transform OTU table
-ps <- transform(ps, transform = "log10")
-```
-
 ### Calculate distance matrices
 
 ```{r}
 # Calculate all four distance matrices: weighted unifrac, unweighted unifrac, bray curtis, binary jaccard
-ps_wu <- phyloseq::distance(ps, method = "wunifrac")
-ps_un <- phyloseq::distance(ps, method = "unifrac")
 ps_bc <- phyloseq::distance(ps, method = "bray")
 ps_bj <- distance(ps, method = "jaccard", binary =TRUE)
 ```
@@ -243,28 +141,16 @@ ps_bj <- distance(ps, method = "jaccard", binary =TRUE)
 # PERMANOVA's with Adonis -  Permutational Multivariate Analasis of Variance
 # Make a data frame from the sample_data
 sampledf <- data.frame(sample_data(ps))
-psdf <- as.data.frame(otu_table(ps))
-```
-#### geno
-```{r}
-# Adonis individual tests
-adonis(ps_bc ~ bleach*geno, data = sampledf)
-adonis(ps_bj ~ bleach*geno, data = sampledf)
-adonis(ps_wu ~ bleach*geno, data = sampledf)
-adonis(ps_un ~ bleach*geno, data = sampledf)
 
+# Adonis individual tests
 adonis(ps_bc ~ bleach*type, data = sampledf)
 adonis(ps_bj ~ bleach*type, data = sampledf)
-adonis(ps_wu ~ bleach*type, data = sampledf)
-adonis(ps_un ~ bleach*type, data = sampledf)
 
 # all significant
 ## pairwise tests are all not significant (padj) probably too many comparisons
 ## maybe I should use the unadjusted pval?
-pairwise.adonis.dm(ps_bc, sample_data(ps)$geno, p.adjust.m = "fdr")
+pairwise.adonis.dm(ps_bc, sample_data(ps)$bleach.type, p.adjust.m = "fdr")
 #pairwise.adonis.dm(ps_bj, sample_data(ps)$geno, p.adjust.m = "fdr")
-#pairwise.adonis.dm(ps_wu, sample_data(ps)$geno, p.adjust.m = "fdr")
-#pairwise.adonis.dm(ps_un, sample_data(ps)$geno, p.adjust.m = "fdr")
 ```
 
 ### PERMDISPs
@@ -272,53 +158,24 @@ pairwise.adonis.dm(ps_bc, sample_data(ps)$geno, p.adjust.m = "fdr")
 ```{r}
 anova(betadisper(ps_bc, sampledf$bleach, bias.adjust = TRUE))
 anova(betadisper(ps_bj, sampledf$bleach, bias.adjust = TRUE))
-anova(betadisper(ps_wu, sampledf$bleach, bias.adjust = TRUE))
-anova(betadisper(ps_un, sampledf$bleach, bias.adjust = TRUE))
-# All non-significant
 ```
-#### genotype
+
+#### type
 ```{r}
-anova(betadisper(ps_bc, sampledf$geno, bias.adjust = TRUE))
-anova(betadisper(ps_bj, sampledf$geno, bias.adjust = TRUE))
-anova(betadisper(ps_wu, sampledf$geno, bias.adjust = TRUE))
-anova(betadisper(ps_un, sampledf$geno, bias.adjust = TRUE))
+anova(betadisper(ps_bc, sampledf$type, bias.adjust = TRUE))
+anova(betadisper(ps_bj, sampledf$type, bias.adjust = TRUE))
 ```
 #### Interaction
 ```{r}
-anova(betadisper(ps_bc, sampledf$bleach.geno, bias.adjust = TRUE))
-anova(betadisper(ps_bj, sampledf$bleach.geno, bias.adjust = TRUE))
-anova(betadisper(ps_un, sampledf$bleach.geno, bias.adjust = TRUE))
-anova(betadisper(ps_wu, sampledf$bleach.geno, bias.adjust = TRUE))
+anova(betadisper(ps_bc, sampledf$bleach.type, bias.adjust = TRUE))
+anova(betadisper(ps_bj, sampledf$bleach.type, bias.adjust = TRUE))
+
 # pairwise tests
-#p.adjust(permutest(betadisper(ps_un, sampledf$geno.trt, 
-#                              bias.adjust = TRUE), 
-#                   pairwise=TRUE)$pairwise$permuted, method = 'fdr')
+p.adjust(permutest(betadisper(ps_bc, sampledf$bleach.type, 
+                              bias.adjust = TRUE), 
+                   pairwise=TRUE)$pairwise$permuted, method = 'fdr')
 #p.adjust(permutest(betadisper(ps_wu, sampledf$geno.trt, 
 #                              bias.adjust = TRUE), 
 #                   pairwise=TRUE)$pairwise$permuted, method = 'fdr')
 
 ```
-
-Plotting
-```{r}
-myCol <- c('#e6194b', '#3cb44b', '#ffe119', 
-           '#4363d8', '#f58231', '#911eb4', '#46f0f0', 
-           '#f032e6', '#bcf60c', '#008080',
-           '#9a6324', '#800000', '#808000', 
-          '#000075', '#808080', '#000000')
-
-
-nmds_bc <- metaMDSiter(ps_bc, k=2, trymax = 1000, maxit = 1000, autotransform=FALSE)
-#nmds_wu <- metaMDSiter(ps_wu, k=2, trymax = 1000, maxit = 1000, autotransform=FALSE)
-#save(nmds_bc, file = "../data/nmds_bc.RData")
-
-
-
-
-b <- plot_ordination(ps, nmds_bc, color = "geno.num", shape = "bleach") + 
-  geom_point(size = 2) + 
-  theme_classic() +
-  theme(legend.position = "left") +
-  labs(color = "Genotype") +
-  scale_colour_manual(values = myCol)
-b

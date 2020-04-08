@@ -63,32 +63,62 @@ normality.plots <- function(x) {
 #### Load the data
 Load the alphadiv.csv files created in the RAPID_alpha_statsA.Rmd script. First starting with all species
 ```{r load}
-alphadiv <- read.csv("../data/alphadiv8692.csv")
-alphadiv <- read.csv("../data/alphadiv_norick_rar.csv")
+# load alpha diversity datasets for with and without aquarickettsia
+alphadiv <- read.csv("../data/alphadiv_8663.csv")
+alphadiv2 <- read.csv("../data/alphadiv_823.csv")
+alphadiv2 <- alphadiv2[,1:5]
+colnames(alphadiv2) <- c("X","observeda", "chao1a","simpsona","shannona")
+alphadiv <- cbind(alphadiv, alphadiv2)
+alphadiv <- alphadiv[,-17]
 head(alphadiv)
+
+#write.csv(alphadiv, file = "../data/alphadiv_all.csv")
+#alphadiv <- read.csv(file = "../data/alphadiv_all.csv")
+
+alphadiv <- alphadiv[which(alphadiv$geno.num != 20),]
 ```
 
 
 ### 2 Data Summary statistics
 
 ```{r}
-# Data summaries
+# Data summaries with Aquarickettsia
 # Observed
 data_summary(alphadiv, varname = "observed", groupnames = c("bleach"))
-data_summary(alphadiv, varname = "observed", groupnames = c("geno"))
-data_summary(alphadiv, varname = "observed", groupnames = c("bleach.geno"))
+data_summary(alphadiv, varname = "observed", groupnames = c("type"))
+data_summary(alphadiv, varname = "observed", groupnames = c("bleach.type"))
+# Chao1
+data_summary(alphadiv, varname = "chao1", groupnames = c("bleach"))
+data_summary(alphadiv, varname = "chao1", groupnames = c("type"))
+data_summary(alphadiv, varname = "chao1", groupnames = c("bleach.type"))
 # Simpson
 data_summary(alphadiv, varname = "simpson", groupnames = c("bleach"))
-data_summary(alphadiv, varname = "simpson", groupnames = c("geno"))
-data_summary(alphadiv, varname = "simpson", groupnames = c("bleach.geno"))
+data_summary(alphadiv, varname = "simpson", groupnames = c("type"))
+data_summary(alphadiv, varname = "simpson", groupnames = c("bleach.type"))
 # Shannon
 data_summary(alphadiv, varname = "shannon", groupnames = c("bleach"))
-data_summary(alphadiv, varname = "shannon", groupnames = c("geno"))
-data_summary(alphadiv, varname = "shannon", groupnames = c("bleach.geno"))
-# FaithPD
-data_summary(alphadiv, varname = "faithPD", groupnames = c("bleach"))
-data_summary(alphadiv, varname = "faithPD", groupnames = c("geno"))
-data_summary(alphadiv, varname = "faithPD", groupnames = c("bleach.geno"))
+data_summary(alphadiv, varname = "shannon", groupnames = c("type"))
+data_summary(alphadiv, varname = "shannon", groupnames = c("bleach.type"))
+```
+
+#### Data summaries without Aquarickettsia
+```{r}
+# Observed
+data_summary(alphadiv, varname = "observeda", groupnames = c("bleach"))
+data_summary(alphadiv, varname = "observeda", groupnames = c("type"))
+data_summary(alphadiv, varname = "observeda", groupnames = c("bleach.type"))
+# Chao1
+data_summary(alphadiv, varname = "chao1a", groupnames = c("bleach"))
+data_summary(alphadiv, varname = "chao1a", groupnames = c("type"))
+data_summary(alphadiv, varname = "chao1a", groupnames = c("bleach.type"))
+# Simpson
+data_summary(alphadiv, varname = "simpsona", groupnames = c("bleach"))
+data_summary(alphadiv, varname = "simpsona", groupnames = c("type"))
+data_summary(alphadiv, varname = "simpsona", groupnames = c("bleach.type"))
+# Shannon
+data_summary(alphadiv, varname = "shannona", groupnames = c("bleach"))
+data_summary(alphadiv, varname = "shannona", groupnames = c("type"))
+data_summary(alphadiv, varname = "shannona", groupnames = c("bleach.type"))
 ```
 ### 3 Non Parametric Tests for significance
 Using Kruskal Wallis tests
@@ -97,76 +127,113 @@ Using Kruskal Wallis tests
 ```{r}
 #Kruskal Wallis tests
 kruskal.test(observed ~ bleach, data = alphadiv)
-kruskal.test(observed ~ geno, data = alphadiv)
 kruskal.test(observed ~ type, data = alphadiv)
-#kruskal.test(observed ~ bleach.geno, data = alphadiv)
-#pairwise.wilcox.test(alphadiv$observed, alphadiv$bleach.geno, p.adjust.method = 'fdr')
+kruskal.test(observed ~ bleach.type, data = alphadiv)
+pairwise.wilcox.test(alphadiv$observed, alphadiv$bleach.type, p.adjust.method = 'fdr')
+```
+
+#### Chao1
+```{r}
+#Kruskal Wallis tests
+kruskal.test(chao1 ~ bleach, data = alphadiv)
+kruskal.test(chao1 ~ type, data = alphadiv)
+kruskal.test(chao1 ~ bleach.type, data = alphadiv)
+pairwise.wilcox.test(alphadiv$chao1, alphadiv$bleach.type, p.adjust.method = 'fdr')
 ```
 
 #### Simpson's Index
 ```{r}
 kruskal.test(simpson ~ bleach, data = alphadiv)
-kruskal.test(simpson ~ geno, data = alphadiv)
 kruskal.test(simpson ~ type, data = alphadiv)
-#pairwise.wilcox.test(alphadiv$simpson, alphadiv$bleach.geno, p.adjust.method = 'fdr')
+kruskal.test(simpson ~ bleach.type, data = alphadiv)
+pairwise.wilcox.test(alphadiv$simpson, alphadiv$bleach.type, p.adjust.method = 'fdr')
 ```
 
 #### Shannon's Index
 ```{r}
 kruskal.test(shannon ~ bleach, data = alphadiv)
-kruskal.test(shannon ~ geno, data = alphadiv)
 kruskal.test(shannon ~ type, data = alphadiv)
-#pairwise.wilcox.test(alphadiv$shannon, alphadiv$bleach.geno, p.adjust.method = 'fdr')
+kruskal.test(shannon ~ bleach.type, data = alphadiv)
+pairwise.wilcox.test(alphadiv$shannon, alphadiv$bleach.type, p.adjust.method = 'fdr')
 ```
 
-#### Faith PD
+### 3 Non Parametric Tests for significance without Aquarickettsia
+Using Kruskal Wallis tests
+
+#### Observed ASVs
 ```{r}
-kruskal.test(faithPD ~ bleach, data = alphadiv)
-kruskal.test(faithPD ~ geno, data = alphadiv)
-kruskal.test(faithPD ~ type, data = alphadiv)
-#pairwise.wilcox.test(alphadiv$faithPD, alphadiv$bleach.geno, p.adjust.method = 'fdr')
-```
-### Tests for differences within resistant genotypes
-```{r}
-alphadiv_res <- subset(alphadiv, alphadiv$type == "resistant")
-kruskal.test(observed ~ bleach, data = alphadiv_res)
-kruskal.test(simpson ~ bleach, data = alphadiv_res)
-kruskal.test(shannon ~ bleach, data = alphadiv_res)
-kruskal.test(faithPD ~ bleach, data = alphadiv_res)
+#Kruskal Wallis tests
+kruskal.test(observeda ~ bleach, data = alphadiv)
+kruskal.test(observeda ~ type, data = alphadiv)
+kruskal.test(observeda ~ bleach.type, data = alphadiv)
+pairwise.wilcox.test(alphadiv$observeda, alphadiv$bleach.type, p.adjust.method = 'fdr')
 ```
 
-### 4 Parametric tests for significance
-Looking for normality and homogeneity of group dispersions
+#### Chao1
 ```{r}
-# observed ASVs
-histogram(alphadiv$observed)
-qqnorm(alphadiv$observed)
-shapiro.test(alphadiv$observed)
-# sqrt transform makes the data normal
-histogram(sqrt(alphadiv$observed))
-qqnorm(sqrt(alphadiv$observed))
-shapiro.test(sqrt(alphadiv$observed))
-# test for homogeneity of group dispersions
-bartlett.test(sqrt(observed) ~ bleach, data = alphadiv)
-bartlett.test(sqrt(observed) ~ geno, data = alphadiv)
-## not significant indicates that the variances in each of the groups are the same
-
-# proceeding with anova tests
-summary(aov(sqrt(observed) ~ geno*bleach, alphadiv)) # results disagree with 
-summary(aov(sqrt(observed) ~ type, alphadiv))
-#the kruskal wallis test
-TukeyHSD(aov(sqrt(observed) ~ geno, alphadiv)) # this gets wonky because too many comparisons
+#Kruskal Wallis tests
+kruskal.test(chao1a ~ bleach, data = alphadiv)
+kruskal.test(chao1a ~ type, data = alphadiv)
+kruskal.test(chao1a ~ bleach.type, data = alphadiv)
+pairwise.wilcox.test(alphadiv$chao1a, alphadiv$bleach.type, p.adjust.method = 'fdr')
 ```
 
+#### Simpson's Index
 ```{r}
-# Shannon
-histogram(alphadiv$shannon)
-qqnorm(alphadiv$shannon)
-shapiro.test(alphadiv$shannon)
-# sqrt transform makes the data normal
-histogram(log(alphadiv$shannon))
-qqnorm(log(alphadiv$shannon))
-shapiro.test(log(alphadiv$shannon))
-## can't seem to find a transformation that makes this normal
-## going to stick with kruskal wallis
+kruskal.test(simpsona ~ bleach, data = alphadiv)
+kruskal.test(simpsona ~ type, data = alphadiv)
+kruskal.test(simpsona ~ bleach.type, data = alphadiv)
+pairwise.wilcox.test(alphadiv$simpsona, alphadiv$bleach.type, p.adjust.method = 'fdr')
 ```
+
+#### Shannon's Index
+```{r}
+kruskal.test(shannona ~ bleach, data = alphadiv)
+kruskal.test(shannona ~ type, data = alphadiv)
+kruskal.test(shannona ~ bleach.type, data = alphadiv)
+pairwise.wilcox.test(alphadiv$shannona, alphadiv$bleach.type, p.adjust.method = 'fdr')
+```
+<!-- ### Tests for differences within resistant genotypes -->
+<!-- ```{r} -->
+<!-- alphadiv_res <- subset(alphadiv, alphadiv$type == "resistant") -->
+<!-- kruskal.test(observed ~ bleach, data = alphadiv_res) -->
+<!-- kruskal.test(simpson ~ bleach, data = alphadiv_res) -->
+<!-- kruskal.test(shannon ~ bleach, data = alphadiv_res) -->
+<!-- kruskal.test(faithPD ~ bleach, data = alphadiv_res) -->
+<!-- ``` -->
+
+<!-- ### 4 Parametric tests for significance -->
+<!-- Looking for normality and homogeneity of group dispersions -->
+<!-- ```{r} -->
+<!-- # observed ASVs -->
+<!-- histogram(alphadiv$observed) -->
+<!-- qqnorm(alphadiv$observed) -->
+<!-- shapiro.test(alphadiv$observed) -->
+<!-- # sqrt transform makes the data normal -->
+<!-- histogram(sqrt(alphadiv$observed)) -->
+<!-- qqnorm(sqrt(alphadiv$observed)) -->
+<!-- shapiro.test(sqrt(alphadiv$observed)) -->
+<!-- # test for homogeneity of group dispersions -->
+<!-- bartlett.test(sqrt(observed) ~ bleach, data = alphadiv) -->
+<!-- bartlett.test(sqrt(observed) ~ geno, data = alphadiv) -->
+<!-- ## not significant indicates that the variances in each of the groups are the same -->
+
+<!-- # proceeding with anova tests -->
+<!-- summary(aov(sqrt(observed) ~ geno*bleach, alphadiv)) # results disagree with  -->
+<!-- summary(aov(sqrt(observed) ~ type, alphadiv)) -->
+<!-- #the kruskal wallis test -->
+<!-- TukeyHSD(aov(sqrt(observed) ~ geno, alphadiv)) # this gets wonky because too many comparisons -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- # Shannon -->
+<!-- histogram(alphadiv$shannon) -->
+<!-- qqnorm(alphadiv$shannon) -->
+<!-- shapiro.test(alphadiv$shannon) -->
+<!-- # sqrt transform makes the data normal -->
+<!-- histogram(log(alphadiv$shannon)) -->
+<!-- qqnorm(log(alphadiv$shannon)) -->
+<!-- shapiro.test(log(alphadiv$shannon)) -->
+<!-- ## can't seem to find a transformation that makes this normal -->
+<!-- ## going to stick with kruskal wallis -->
+<!-- ``` -->

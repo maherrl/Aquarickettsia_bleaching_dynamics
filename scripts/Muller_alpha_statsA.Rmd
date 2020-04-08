@@ -90,7 +90,7 @@ data_summary <- function(data, varname, groupnames){
 For all alpha and beta diversity statistics, I will be using the rarefied sOTU table. The table has been rarefied to 1778 sequences per sample.
 ```{r load}
 # analyses to remove Rickettsiales form unrarefied data
-load(file = "./data/ps_rar8663.RData")
+load(file = "./data/ps_rar823.RData")
 ps
 sample_sums(ps)
 ```
@@ -112,8 +112,8 @@ row.names(simpson) <- sample_names(ps)
 shannon <- matrix(nrow =nsamp)
 row.names(shannon) <- sample_names(ps)
 
-faithPD <- matrix(nrow = nsamp)
-row.names(faithPD) <- sample_names(ps)
+#faithPD <- matrix(nrow = nsamp)
+#row.names(faithPD) <- sample_names(ps)
 ##
 ```
 Calculate statistics
@@ -141,16 +141,16 @@ shannon[ ,] <- shan
 colnames(shannon) [1] <- "shannon"
 
 # Calculate Faith's PD
-faith <- as.numeric(as.matrix(subset(estimate_pd(ps), select = c(1))))  # estimate_pd is a function assigned at the end of the script
-faithPD[ ,] <- faith
-colnames(faithPD) [1] <- "faithPD"
+#faith <- as.numeric(as.matrix(subset(estimate_pd(ps), select = c(1))))  # estimate_pd is a function assigned at the end of the script
+#faithPD[ ,] <- faith
+#colnames(faithPD) [1] <- "faithPD"
 
 # Included the subset in "obs" and "faith" because the Chao1 and Faith's PD measurement outputs two measures per sample (Chao1 and se.chao1)
 # and we only want Chao1, so we select for the first column
 ```
 Combine our estimates for observed, simpson, and faith's PD into one dataframe
 ```{r compile}
-alpha <- cbind(observed, chao1,simpson,shannon, faithPD)
+alpha <- cbind(observed, chao1,simpson,shannon)
 
 head(alpha)
 
@@ -158,7 +158,7 @@ head(alpha)
 s <- data.frame(sample_data(ps))
 alphadiv <- cbind(alpha, s)
 head(alphadiv)
-alphadiv <- alphadiv[,-6]
+alphadiv <- alphadiv[,-5]
 head(alphadiv)
-write.csv(alphadiv, file = "../data/alphadiv_8663.csv")
+write.csv(alphadiv, file = "./data/alphadiv_823.csv")
 ```

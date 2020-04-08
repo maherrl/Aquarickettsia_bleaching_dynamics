@@ -64,7 +64,8 @@ uniqueSeqs <- as.list(colnames(seqtab))
 #write.fasta(uniqueSeqs, uniqueSeqs, "./data/uniqueSeqs.fasta")
 
 # phylogenetic tree made from qiime phylogeny align-to-tree-mafft-fasttree
-tree = read_tree("./data/tree.nwk")
+# tree = read_tree("./data/tree.nwk")
+
 # import metadata and merge into phyloseq object
 mapfile = "./data/map.txt"
 map = import_qiime_sample_data(mapfile)
@@ -81,26 +82,28 @@ tax<-as(tax_table(ps),"matrix")
 tax_cols <- c("Kingdom", "Phylum", "Class", "Order","Family","Genus", "Species")
 tax<-as.data.frame(tax)
 tax$taxonomy<-do.call(paste, c(tax[tax_cols], sep=";"))
-for(co in tax_cols) tax[co]<-NULL
-write.table(tax, "./qiime/taxonomy.txt", quote=FALSE, col.names=FALSE, sep="\t")
+tax <- tax %>% select(taxonomy)
+write.table(tax, "./qiime/taxonomy.txt", quote=FALSE, col.names=FALSE, sep="\t", row.names = TRUE)
 
 # summary of data
 ps
 summary(sample_data(ps))
 
+sum(sample_sums(ps))
 ntaxa(ps)
 nsamples(ps)
 rank_names(ps)
 sample_names(ps)[1:5]
 sample_variables(ps)
-phy_tree(ps)
 
 # remove mitochondria and chloroplasts, is.na important becuase if not included
 # this command will also remove all Family = NA or Order = NA
 ps = subset_taxa(ps, (Family!="Mitochondria") | is.na(Family))
 ps = subset_taxa(ps, (Order!="Chloroplast") | is.na(Order))
-
+ps
+sum(sample_sums(ps))
 # Filter on prevalence or total counts
+summary(taxa_sums(ps))
 pst = fast_melt(ps)
 prevdt = pst[, list(Prevalence = sum(count > 0), 
                     TotalCounts = sum(count)),
@@ -109,11 +112,22 @@ keepTaxa = prevdt[(Prevalence >=0 & TotalCounts >29), taxaID]
 ps = prune_taxa(keepTaxa,ps)
 ps
 sample_sums(ps)
+median(sample_sums(ps))
+sum(sample_sums(ps))
 min(sample_sums(ps))
-#save(ps, file = "./data/ps.RData")
+save(ps, file = "./data/ps.RData")
 
-sample_data(ps)$geno.num=factor(get_variable(ps, "geno.num"))
-# 28 is the bottom quartile frequency per feature (asv)
+# remove aquarickettsia
+ps <- subset_taxa(ps, Genus != "MD3-55")
+ps
+sample_sums(ps)
+median(sample_sums(ps))
+sum(sample_sums(ps))
+min(sample_sums(ps))
+max(sample_sums(ps))
+min_lib <- min(sample_sums(ps)) 
+ps <- rarefy_even_depth(ps, sample.size = min_lib, verbose = FALSE, replace = TRUE)
+save(ps, file = "./data/ps_rar823.RData")
 
 # exploratory code
 observed <- estimate_richness(ps, measures = c('Observed'))
