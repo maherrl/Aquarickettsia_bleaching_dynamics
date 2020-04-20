@@ -5,7 +5,6 @@
 
 rm(list=ls())
 
-library("dada2")
 library("seqinr")
 library("biomformat")
 library("data.table")
@@ -15,10 +14,14 @@ library("ampvis2")
 library("cowplot")
 library("phyloseq")
 library("data.table")
+library("dada2")
 
 setwd("/Users/Becca/Box Sync/Muller Bleaching and Rickettsiales/Muller-Acropora/")
 
 # functions
+## Note: this function may be irrelevant now. Check out the phyloseq tutorials
+## online to see updated tools to filter samples on prevalence and total counts
+
 fast_melt = function(physeq){
   # supports "naked" otu_table as `physeq` input.
   otutab = as(otu_table(physeq), "matrix")
@@ -103,6 +106,13 @@ ps = subset_taxa(ps, (Order!="Chloroplast") | is.na(Order))
 ps
 sum(sample_sums(ps))
 # Filter on prevalence or total counts
+## Note from above about the fast_melt function applies here, (check out phyloseq tutorial first)
+## Note: this function may be irrelevant now. Check out the phyloseq tutorials
+## online to see updated tools to filter samples on prevalence and total counts
+## for instance: Remove taxa not seen more than 3 times in at least 20% of the samples. 
+## This protects against an OTU with small mean & trivially large C.V.
+## From phyloseq tutorial:
+##GP = filter_taxa(GlobalPatterns, function(x) sum(x > 3) > (0.2*length(x)), TRUE)
 summary(taxa_sums(ps))
 pst = fast_melt(ps)
 prevdt = pst[, list(Prevalence = sum(count > 0), 
@@ -111,6 +121,7 @@ prevdt = pst[, list(Prevalence = sum(count > 0),
 keepTaxa = prevdt[(Prevalence >=0 & TotalCounts >29), taxaID]
 ps = prune_taxa(keepTaxa,ps)
 ps
+#summaary
 sample_sums(ps)
 median(sample_sums(ps))
 sum(sample_sums(ps))
