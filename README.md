@@ -1,2 +1,2 @@
-# Muller-Acropora
-Project with Erinn Muller looking at disease susceptible Acropora genotypes under bleaching
+# Aquarickettsia_bleaching_dynamics
+Here we evaluate the microbiomes of apparently healthy and bleached Acropoca cervicornis corals that were previously classified as disease-resistant or disease-susceptble to WBD.
