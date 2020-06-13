@@ -341,6 +341,8 @@ ps <- subset_samples(ps, bleach == "Aug")
 ps <- subset_samples(ps, bleach == "Sep")
 ps <- subset_samples(ps, type == "resistant")
 ps <- subset_samples(ps, type == "susceptible")
+ps <- subset_samples(ps, bleach.type == "Augresistant" | bleach.type == "Sepsusceptible")
+ps <- subset_samples(ps, bleach.type == "Augsusceptible" | bleach.type == "Sepresistant")
 
 # OTU data or taxa data: This should be a data frame with each
 # sample in rows and OTUs (or taxa) in columns. The first 
@@ -364,7 +366,7 @@ struc_zero = prepro$structure_zeros # Structural zero info
 
 # Step 2: ANCOM
 
-main_var = "bleach"; p_adj_method = "fdr"; alpha = 0.05
+main_var = "bleach.type"; p_adj_method = "fdr"; alpha = 0.05
 adj_formula = NULL; rand_formula = NULL
 
 res = ANCOM(feature_table, meta_data, struc_zero, main_var, p_adj_method, 
@@ -377,12 +379,17 @@ figdf_sus <- as.data.frame(res$fig$data)
 figdf_res <- as.data.frame(res$fig$data)
 figdf_Sep <- as.data.frame(res$fig$data)
 figdf_Aug <- as.data.frame(res$fig$data)
+figdf_b.t <- as.data.frame(res$fig$data)
+figdf_t.b <- as.data.frame(res$fig$data)
 
 figdf_sus$contrast <- "sus"
 figdf_res$contrast <- "res"
 figdf_Sep$contrast <- "Sep"
 figdf_Aug$contrast <- "Aug"
+figdf_b.t$contrast <- "ArSs"
+figdf_t.b$contrast <- "AsSr"
 
+figdf <- rbind(figdf_b.t, figdf_t.b)
 figdf <- rbind(figdf_Aug, figdf_Sep, figdf_res, figdf_sus)
 figdf <- merge(figdf,tax, by = "taxa_id")
 write_csv(figdf, "data/ancomv2_all_fig.csv")
@@ -401,12 +408,17 @@ resdf_sus <- resdf
 resdf_res <- resdf
 resdf_Sep <- resdf
 resdf_Aug <- resdf
+resdf_b.t <- resdf
+resdf_t.b <- resdf
 
 resdf_sus$contrast <- "sus"
 resdf_res$contrast <- "res"
 resdf_Sep$contrast <- "Sep"
 resdf_Aug$contrast <- "Aug"
+resdf_b.t$contrast <- "ArSs"
+resdf_t.b$contrast <- "AsSr"
 
+resdf <- rbind(resdf_b.t, resdf_t.b)
 resdf <- rbind(resdf_Aug, resdf_Sep, resdf_res, resdf_sus)
 resdf <- merge(resdf,tax, by = "taxa_id")
 write_csv(resdf, "data/ancomv2_all_res.csv")
@@ -467,6 +479,9 @@ figdf$col_genus[is.na(figdf$col_genus)] = "Other"
 figdf$contrast <- as.factor(figdf$contrast)
 levels(figdf$contrast) <- c("Aug","Sep","res","sus")
 figdf$contrast <- factor(figdf$contrast, c("Aug","Sep","sus","res"))
+
+levels(figdf$contrast) <- c("Apparently Healthy Resistant vs\nBleached Susceptible", 
+                            "Apparently Healthy Susceptible vs\nBleached Resistant")
 
 levels(figdf$contrast) <- c("Apparently Healthy\nSusceptible vs Resistant","Bleached\nSusceptible vs Resistant", 
                             "Susceptible Bleached\nvs Apparently Healthy","Resistant Bleached\nvs Apparently Healthy")

@@ -41,13 +41,14 @@ ordicenter <- function (ord, groups, display = "sites", w = weights(ord, display
   invisible()
 }
 
-load(file = "./data/ps_rar8692.RData")
+load(file = "./data/ps_rar8663.RData")
 ps
 sample_sums(ps)
 ps_bc <- phyloseq::distance(ps, method = "bray")
 nmds_bc <- metaMDSiter(ps_bc, k=2, trymax = 1000, maxit = 1000, autotransform=FALSE)
+pcoa_bc <- ordinate(ps, dist = ps_bc, "PCoA")
 
-plot_ordination(ps, nmds_bc, color = "type", shape = "bleach") + 
+plot_ordination(ps, object, color = "type", shape = "bleach", axes = 2:3) + 
   geom_point(size = 2) + 
   theme_classic() +
   theme(legend.position = "left") +

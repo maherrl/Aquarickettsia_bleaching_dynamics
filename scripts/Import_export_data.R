@@ -142,7 +142,7 @@ save(ps, file = "./data/ps_rar823.RData")
 
 # exploratory code
 observed <- estimate_richness(ps, measures = c('Observed'))
-explore.df <- cbind(observed, sample_sums(ps), sample_data(ps)$bleach)
+explore.df <- cbind(observed, sample_sums(ps), sample_data(ps)$Treatment)
 colnames(explore.df) <- c('Observed', 'Sample_Sums', 'Month')
 observed_mean <- mean(explore.df$Observed)
 sample_sum_mean <- mean(explore.df$Sample_Sums)

@@ -5,12 +5,16 @@ library("ggplot2")
 library("ggthemes")
 library("cowplot")
 
-
-alphadiv <- read.csv("./data/alphadiv8692.csv")
-alphadiv <- read.csv("./data/alphadiv_norick_rar.csv")
+# load alpha diversity datasets for with and without aquarickettsia
+alphadiv <- read.csv("./data/alphadiv_8663.csv")
+alphadiv2 <- read.csv("./data/alphadiv_823.csv")
+alphadiv2 <- alphadiv2[,1:5]
+colnames(alphadiv2) <- c("X","observeda", "chao1a","simpsona","shannona")
+alphadiv <- cbind(alphadiv, alphadiv2)
+alphadiv <- alphadiv[,-17]
 head(alphadiv)
-alphadiv$geno.num <- as.factor(alphadiv$geno.num)
 
+alphadiv$geno.num <- as.factor(alphadiv$geno.num)
 
 levels(alphadiv$geno) <- c("G1", "G3", "G4","G5","G7","G9","G10","G13","G20","G41","G44","G46","G47","G50","G57","G58")
 levels(alphadiv$bleach)
@@ -35,8 +39,9 @@ myCol <- c('#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#4
            '#f032e6', '#bcf60c', '#008080',
            '#9a6324', '#800000', '#808000', 
           '#000075', '#808080', '#000000')
-breakss <- c("Aug","Sep")
-labelss <- c("Pre Bleach", "Bleached")
+levels(alphadiv$bleach) <- c("Pre-Bleach", "Bleached")
+levels(alphadiv$type) <- c("Resistant","Susceptible")
+
 myCol <- c("#E69F00","#56B4E9")
 
 # alpha diversity boxplot
@@ -52,10 +57,59 @@ A <- ggplot(alphadiv, aes(x=type, y=shannon)) +
         axis.text.x = element_text(size = 10),
         legend.position = "none") +
   scale_colour_manual(values = myCol) +
-  ylim(2,5.5)
+  ylim(2,5.5) +
+  ggtitle("With Aquarickettsia")
 A
-ggsave(A, "./plots/observed_.pdf")
-plot_grid(A,B)
+B <- ggplot(alphadiv, aes(x=type, y=shannona)) +
+  facet_wrap(~bleach)+
+  geom_boxplot(outlier.shape = NA, color = "gray35") +
+  geom_point(aes(color = type), 
+             position = position_jitter(width = .25, height = 0)) +
+  scale_x_discrete(breaks=breakss, labels=labelss) +
+  ylab("Shannon's diversity index") +
+  theme_bw() +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(size = 10),
+        legend.position = "none") +
+  scale_colour_manual(values = myCol) +
+  ylim(2,5.5) +
+  ggtitle("Without Aquarickettsia")
+B
+
+plot_grid(A,B, labels = c("A","B"))
+
+C <- ggplot(alphadiv, aes(x=type, y=chao1)) +
+  facet_wrap(~bleach)+
+  geom_boxplot(outlier.shape = NA, color = "gray35") +
+  geom_point(aes(color = type), 
+             position = position_jitter(width = .25, height = 0)) +
+  scale_x_discrete(breaks=breakss, labels=labelss) +
+  ylab("Chao1 index") +
+  theme_bw() +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(size = 10),
+        legend.position = "none") +
+  scale_colour_manual(values = myCol) +
+  ylim(25,200) +
+  ggtitle("With Aquarickettsia")
+C
+D <- ggplot(alphadiv, aes(x=type, y=chao1a)) +
+  facet_wrap(~bleach)+
+  geom_boxplot(outlier.shape = NA, color = "gray35") +
+  geom_point(aes(color = type), 
+             position = position_jitter(width = .25, height = 0)) +
+  scale_x_discrete(breaks=breakss, labels=labelss) +
+  ylab("Shannon's diversity index") +
+  theme_bw() +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(size = 10),
+        legend.position = "none") +
+  scale_colour_manual(values = myCol) +
+  ylim(25,200) +
+  ggtitle("Without Aquarickettsia")
+D
+
+plot_grid(A,B,C,D, nrow = 2, labels = c("A","B","C","D"))
 
 D <- ggplot(alphadiv, aes(x=bleach, y=faithPD)) +
   geom_boxplot(outlier.shape = NA, color = "gray35") +
