@@ -46,7 +46,7 @@ mergers <- vector("list", length(sample.names))
 names(mergers) <- sample.names
 
 # Note: if this loop doesn't work, you've done something wrong. You've probably made an error earlier in the code, 
-# Probably with the location of your forward and reverse reads and it's generated duplicate sample names
+# probably with the location of your forward and reverse reads and it's generated duplicate sample names
 # Normal to get warning message that there are duplicate sequences
 for(sam in sample.names) {
   cat("Processing:", sam, "\n")
@@ -60,13 +60,21 @@ for(sam in sample.names) {
 
 # Make sequence table from merged reads
 st.all <- makeSequenceTable(mergers) # Normal to get warning message saying the sequences being tabled vary in length
+
 # Remove any ASVs that are considerably shorter or longer than target length of 292
 seqtab_trimmed <- st.all[,nchar(colnames(seqtab_strict)) %in% seq(290,295)]
+
+# Inspect distribution of read lengths after removal of off-target reads
 table(nchar(getSequences(seqtab_trimmed)))
+
+# Remove chimeric sequences
 seqtab_trimmed_clean <- removeBimeraDenovo(seqtab_trimmed, method="consensus", multithread=TRUE)
+sum(seqtab_trimmed_clean)/sum(seqtab_trimmed) # How many chimeras were removed?
+
+# Save chimera-free ASV table as downstream tasks may cause R to crash
 saveRDS(seqtab_trimmed_clean, "~/Bleaching_Rickettsiales/seqtab_trimmed_clean.rds")
 
-# Assign taxonomy based on silva reference database at genus level
+# Assign taxonomy based on silva reference database at genus level, you must have the appropriate Silva database downloaded
 tax_silva <- assignTaxonomy(seqtab_trimmed_clean, "~/Bleaching_Rickettsiales/silva_nr_v132_train_set.fa.gz", multithread=TRUE)
 
 # Assign taxonomy based on silva reference database at species (100%) level
