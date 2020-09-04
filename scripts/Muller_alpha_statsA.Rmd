@@ -87,7 +87,7 @@ data_summary <- function(data, varname, groupnames){
 ```
 
 #### Load the data
-For all alpha and beta diversity statistics, I will be using the rarefied sOTU table. The table has been rarefied to 1778 sequences per sample.
+For all alpha and beta diversity statistics, I will be using the rarefied sOTU table. 
 ```{r load}
 # analyses to remove Rickettsiales form unrarefied data
 load(file = "./data/ps_rar823.RData")
@@ -96,7 +96,7 @@ sample_sums(ps)
 ```
 
 ### Calculating alpha diversity statistics
-Initialize matrices to store obsness and simpson estimates
+Initialize matrices to store alpha diversity estimates
 ```{r init}
 nsamp = nsamples(ps)
 

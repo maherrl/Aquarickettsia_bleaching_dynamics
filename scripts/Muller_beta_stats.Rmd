@@ -76,7 +76,6 @@ head(sample_sums(ps))
 ```{r}
 # Calculate all four distance matrices: weighted unifrac, unweighted unifrac, bray curtis, binary jaccard
 ps_bc <- phyloseq::distance(ps, method = "bray")
-ps_bj <- distance(ps, method = "jaccard", binary =TRUE)
 ```
 ### PERMANOVAs
 ```{r}
@@ -84,41 +83,30 @@ ps_bj <- distance(ps, method = "jaccard", binary =TRUE)
 # Make a data frame from the sample_data
 sampledf <- data.frame(sample_data(ps))
 
-# Adonis individual tests
+# Adonis 
 adonis(ps_bc ~ bleach*type, data = sampledf)
-adonis(ps_bj ~ bleach*type, data = sampledf)
 
-# all significant
-## pairwise tests are all not significant (padj) probably too many comparisons
-## maybe I should use the unadjusted pval?
 pairwise.adonis.dm(ps_bc, sample_data(ps)$bleach.type, p.adjust.m = "fdr")
-#pairwise.adonis.dm(ps_bj, sample_data(ps)$geno, p.adjust.m = "fdr")
 ```
 
 ### PERMDISPs
 #### bleach
 ```{r}
 anova(betadisper(ps_bc, sampledf$bleach, bias.adjust = TRUE))
-anova(betadisper(ps_bj, sampledf$bleach, bias.adjust = TRUE))
 ```
 
 #### type
 ```{r}
 anova(betadisper(ps_bc, sampledf$type, bias.adjust = TRUE))
-anova(betadisper(ps_bj, sampledf$type, bias.adjust = TRUE))
 ```
 #### Interaction
 ```{r}
 anova(betadisper(ps_bc, sampledf$bleach.type, bias.adjust = TRUE))
-anova(betadisper(ps_bj, sampledf$bleach.type, bias.adjust = TRUE))
 
 # pairwise tests
 p.adjust(permutest(betadisper(ps_bc, sampledf$bleach.type, 
                               bias.adjust = TRUE), 
                    pairwise=TRUE)$pairwise$permuted, method = 'fdr')
-#p.adjust(permutest(betadisper(ps_wu, sampledf$geno.trt, 
-#                              bias.adjust = TRUE), 
-#                   pairwise=TRUE)$pairwise$permuted, method = 'fdr')
 
 ```
 
@@ -134,7 +122,6 @@ head(sample_sums(ps))
 ```{r}
 # Calculate all four distance matrices: weighted unifrac, unweighted unifrac, bray curtis, binary jaccard
 ps_bc <- phyloseq::distance(ps, method = "bray")
-ps_bj <- distance(ps, method = "jaccard", binary =TRUE)
 ```
 ### PERMANOVAs
 ```{r}
@@ -144,38 +131,26 @@ sampledf <- data.frame(sample_data(ps))
 
 # Adonis individual tests
 adonis(ps_bc ~ bleach*type, data = sampledf)
-adonis(ps_bj ~ bleach*type, data = sampledf)
 
-# all significant
-## pairwise tests are all not significant (padj) probably too many comparisons
-## maybe I should use the unadjusted pval?
 pairwise.adonis.dm(ps_bc, sample_data(ps)$bleach.type, p.adjust.m = "fdr")
-#pairwise.adonis.dm(ps_bj, sample_data(ps)$geno, p.adjust.m = "fdr")
 ```
 
 ### PERMDISPs
 #### bleach
 ```{r}
 anova(betadisper(ps_bc, sampledf$bleach, bias.adjust = TRUE))
-anova(betadisper(ps_bj, sampledf$bleach, bias.adjust = TRUE))
 ```
 
 #### type
 ```{r}
 anova(betadisper(ps_bc, sampledf$type, bias.adjust = TRUE))
-anova(betadisper(ps_bj, sampledf$type, bias.adjust = TRUE))
 ```
 #### Interaction
 ```{r}
 anova(betadisper(ps_bc, sampledf$bleach.type, bias.adjust = TRUE))
-anova(betadisper(ps_bj, sampledf$bleach.type, bias.adjust = TRUE))
 
 # pairwise tests
 p.adjust(permutest(betadisper(ps_bc, sampledf$bleach.type, 
                               bias.adjust = TRUE), 
                    pairwise=TRUE)$pairwise$permuted, method = 'fdr')
-#p.adjust(permutest(betadisper(ps_wu, sampledf$geno.trt, 
-#                              bias.adjust = TRUE), 
-#                   pairwise=TRUE)$pairwise$permuted, method = 'fdr')
-
 ```
