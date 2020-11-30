@@ -210,110 +210,6 @@ ancom.W = function(otu_data,var_data,
   }
 
 
-# load data for differential abundance analysis
-load(file = "./data/ps.RData")
-ps = subset_samples(ps, geno.num != 20)
-ps
-# agglomerate to genus
-ps <- subset_taxa(ps, Genus != "NA")
-ps = filter_taxa(ps, function(x) sum(x > 10) > (0.2*length(x)), TRUE)
-ps <- tax_glom(ps, "Genus")
-
-# OTU data or taxa data: This should be a data frame with each
-# sample in rows and OTUs (or taxa) in columns. The first 
-# column should be the sample identifier with column name
-# "Sample.ID"
-OTUdf1 <- as.data.frame(otu_table(ps))
-OTUdf <- cbind(Sample.ID = rownames(OTUdf1), OTUdf1)
-rownames(OTUdf) <- NULL
-
-
-# Metadata: Dataframe with the first columns being the sample 
-# identifier with column name "Sample.ID"
-
-Vardat2 <- read.csv(file = "./data/map.csv")
-colnames(Vardat2)[1] <- "Sample.ID"
-
-
-# ANCOM test
-# First must run the function ANCOM.main from the ANCOM_updated_code.R files
-
-comp_test = ANCOM.main(OTUdat = OTUdf, 
-                                    Vardat = Vardat2, 
-                                    adjusted = F,
-                                    repeated = F,
-                                    main.var = "bleach.type",
-                                    adj.formula = NULL,
-                                    repeat.var = NULL,
-                                    longitudinal = F,
-                                    random.formula = NULL,
-                                    multcorr = 2,
-                                    sig=0.05,
-                                    prev.cut = 0.90)
-
-comp_test$W.taxa
-
-comp_test2 = ANCOM.main(OTUdat = OTUdf, 
-                       Vardat = Vardat2, 
-                       adjusted = T,
-                       repeated = F,
-                       main.var = "bleach:type",
-                       adj.formula = "bleach + type",
-                       repeat.var = NULL,
-                       longitudinal = F,
-                       random.formula = NULL,
-                       multcorr = 2,
-                       sig=0.05,
-                       prev.cut = 0.90)
-
-comp_test2$W.taxa
-
-comp_test3 = ANCOM.main(OTUdat = OTUdf, 
-                        Vardat = Vardat2, 
-                        adjusted = F,
-                        repeated = F,
-                        main.var = "bleach",
-                        adj.formula = NULL,
-                        repeat.var = NULL,
-                        longitudinal = F,
-                        random.formula = NULL,
-                        multcorr = 2,
-                        sig=0.05,
-                        prev.cut = 0.90)
-
-comp_test3$W.taxa
-
-
-# Output results and join with taxonomy
-res <- as.data.frame(comp_test2$W.taxa)
-head(res)
-colnames(res)
-dim(res)
-tax<-as(tax_table(ps),"matrix")
-tax_cols <- c("Kingdom", "Phylum", "Class", "Order","Family","Genus", "Species")
-tax<-as.data.frame(tax)
-colnames(tax)
-tax$otu.names <- rownames(tax)
-rownames(tax) <- NULL
-dim(tax)
-tax <- tax[,c(8,1:7)]
-
-joined <- left_join(res,tax, by = "otu.names")
-colnames(joined)
-write.csv(joined, file = "./data/ancom_bleachxtype.csv")
-
-# prepare for heat map plotting
-ps_rel <- transform_sample_counts(ps, function(x) x / sum(x))
-sample_sums(ps_rel)
-ps_rel
-res_T <- res[which(res$detected_0.6 =="TRUE"),]
-ps_rel_T <- prune_taxa(as.vector(res_T$otu.names), ps_rel)
-ps_rel_T
-plot_heatmap(ps_rel_T, sample.label = "bleach", taxa.order = "Family", 
-             taxa.label = "Family", sample.order = "bleach",
-             low = "grey", high = "darkblue", na.value = "white")
-
-
 #########################################################################
 ## Trying new code from https://github.com/FrederickHuangLin/ANCOM
 
@@ -337,6 +233,10 @@ ps <- subset_taxa(ps, Genus != "NA")
 ps = filter_taxa(ps, function(x) sum(x > 10) > (0.2*length(x)), TRUE)
 ps <- tax_glom(ps, "Genus")
 # subset contrasts
+# ancom will be run 6 independent times for each of these contrasts.
+# For bleach == "Aug", ancom will contrast August resistant versus August susceptible samples,
+                 # for type == "resistant", ancom will contrast resistant August versus resistant September samples
+                 # for bleach.type == ..., ancom will comapre august susceptible versus september reseistant and vice versa
 ps <- subset_samples(ps, bleach == "Aug")
 ps <- subset_samples(ps, bleach == "Sep")
 ps <- subset_samples(ps, type == "resistant")
@@ -348,6 +248,7 @@ ps <- subset_samples(ps, bleach.type == "Augsusceptible" | bleach.type == "Sepre
 # sample in rows and OTUs (or taxa) in columns. The first 
 # column should be the sample identifier with column name
 # "Sample.ID"
+# the rest of the code should be repeated for each ps variable (each contrast)
 OTUdf <- as.data.frame(t(otu_table(ps)))
 metadf <- read.csv(file = "./data/map.csv")
 colnames(metadf)[1] <- "Sample.ID"
@@ -374,7 +275,7 @@ res = ANCOM(feature_table, meta_data, struc_zero, main_var, p_adj_method,
 
 resdf <- as.data.frame(res$out)
 
-# compiling figure data
+# compiling results from each contrast for the figure
 figdf_sus <- as.data.frame(res$fig$data)
 figdf_res <- as.data.frame(res$fig$data)
 figdf_Sep <- as.data.frame(res$fig$data)
