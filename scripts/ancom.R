@@ -299,13 +299,12 @@ tax$taxa_id <- rownames(tax)
 rownames(tax) <- NULL
 dim(tax)
 tax <- tax[,c(8,1:7)]
-
+                 
+                 
 figdf <- rbind(figdf_b.t, figdf_t.b)
 figdf <- rbind(figdf_Aug, figdf_Sep, figdf_res, figdf_sus)
 figdf <- merge(figdf,tax, by = "taxa_id")
 write_csv(figdf, "data/ancomv2_all_fig.csv")
-
-
 
 resdf_sus <- resdf
 resdf_res <- resdf
